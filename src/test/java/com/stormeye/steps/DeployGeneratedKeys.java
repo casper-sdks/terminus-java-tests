@@ -1,5 +1,8 @@
 package com.stormeye.steps;
 
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperKeyHelper;
 import com.casper.sdk.helper.CasperTransferHelper;
@@ -11,9 +14,6 @@ import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.AbstractPrivateKey;
 import com.syntifi.crypto.key.AbstractPublicKey;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -81,8 +80,8 @@ public class DeployGeneratedKeys {
         assertThat(sk.getKey(), is(notNullValue()));
         assertThat(pk.getKey(), is(notNullValue()));
 
-        contextMap.put(SENDER_KEY_SK, sk);
-        contextMap.put(SENDER_KEY_PK, pk);
+        contextMap.put(StepConstants.SENDER_KEY_SK, sk);
+        contextMap.put(StepConstants.SENDER_KEY_PK, pk);
     }
 
 
@@ -109,7 +108,7 @@ public class DeployGeneratedKeys {
         assertThat(sk.getKey(), is(notNullValue()));
         assertThat(pk.getKey(), is(notNullValue()));
 
-        contextMap.put(RECEIVER_KEY, pk);
+        contextMap.put(StepConstants.RECEIVER_KEY, pk);
     }
 
     @Then("fund the account from the faucet user with a transfer amount of {long} and a payment amount of {long}")
@@ -121,27 +120,27 @@ public class DeployGeneratedKeys {
         final Ed25519PrivateKey privateKey = new Ed25519PrivateKey();
         privateKey.readPrivateKey(faucetPrivateKeyUrl.getFile());
 
-        contextMap.put(TRANSFER_AMOUNT, transferAmount);
-        contextMap.put(PAYMENT_AMOUNT, paymentAmount);
+        contextMap.put(StepConstants.TRANSFER_AMOUNT, transferAmount);
+        contextMap.put(StepConstants.PAYMENT_AMOUNT, paymentAmount);
 
-        doDeploy(privateKey, contextMap.get(SENDER_KEY_PK));
+        doDeploy(privateKey, contextMap.get(StepConstants.SENDER_KEY_PK));
     }
 
     @Then("transfer to the receiver account the transfer amount of {long} and the payment amount of {long}")
     public void transferToTheReceiverAccountTheTransferAmountOfAndThePaymentAmountOf(long transferAmount, long paymentAmount) throws NoSuchTypeException, GeneralSecurityException, ValueSerializationException {
         logger.info("transfer to the receiver account the transfer amount of {} and the payment amount of {}", transferAmount, paymentAmount);
 
-        contextMap.put(TRANSFER_AMOUNT, transferAmount);
-        contextMap.put(PAYMENT_AMOUNT, paymentAmount);
+        contextMap.put(StepConstants.TRANSFER_AMOUNT, transferAmount);
+        contextMap.put(StepConstants.PAYMENT_AMOUNT, paymentAmount);
 
-        doDeploy(contextMap.get(SENDER_KEY_SK), contextMap.get(RECEIVER_KEY));
+        doDeploy(contextMap.get(StepConstants.SENDER_KEY_SK), contextMap.get(StepConstants.RECEIVER_KEY));
     }
 
-    @And("the transfer approvals signer contains the {string} algo")
+    @And("the returned block header proposer contains the {string} algo")
     public void theReturnedBlockHeaderProposerContainsTheAlgo(String algo) {
         logger.info("the returned block header proposer contains the {} algo", algo);
 
-        final Digest matchingBlockHash = ((BlockAdded) contextMap.get(LAST_BLOCK_ADDED)).getBlockHash();
+        final Digest matchingBlockHash = ((BlockAdded) contextMap.get(StepConstants.LAST_BLOCK_ADDED)).getBlockHash();
         final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
 
         assertThat(block.getBlock().getBody().getProposer().getTag().toString().toUpperCase(), is(algo.toUpperCase(Locale.ROOT)));
@@ -152,19 +151,19 @@ public class DeployGeneratedKeys {
         final Deploy deploy = CasperTransferHelper.buildTransferDeploy(
                 sk,
                 PublicKey.fromAbstractPublicKey(pk),
-                BigInteger.valueOf(contextMap.get(TRANSFER_AMOUNT)),
+                BigInteger.valueOf(contextMap.get(StepConstants.TRANSFER_AMOUNT)),
                 "casper-net-1",
                 Math.abs(new Random().nextLong()),
-                BigInteger.valueOf(contextMap.get(PAYMENT_AMOUNT)),
+                BigInteger.valueOf(contextMap.get(StepConstants.PAYMENT_AMOUNT)),
                 1L,
                 Ttl.builder().ttl("30m").build(),
                 new Date(),
                 new ArrayList<>());
 
-        contextMap.put(PUT_DEPLOY, deploy);
+        contextMap.put(StepConstants.PUT_DEPLOY, deploy);
 
         final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
 
-        contextMap.put(DEPLOY_RESULT, casperService.putDeploy(deploy));
+        contextMap.put(StepConstants.DEPLOY_RESULT, casperService.putDeploy(deploy));
     }
 }

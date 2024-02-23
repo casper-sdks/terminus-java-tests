@@ -1,5 +1,6 @@
 package com.stormeye.steps;
 
+import com.stormeye.utils.*;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperDeployHelper;
 import com.casper.sdk.model.clvalue.*;
@@ -18,7 +19,6 @@ import com.casper.sdk.model.deploy.executabledeploy.Transfer;
 import com.casper.sdk.model.deploy.executionresult.Success;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
-import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import io.cucumber.java.en.And;
@@ -32,7 +32,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
@@ -75,8 +74,8 @@ public class CLValuesDefinitions {
         final Ed25519PrivateKey senderKey = new Ed25519PrivateKey();
         final Ed25519PublicKey receiverKey = new Ed25519PublicKey();
 
-        senderKey.readPrivateKey(AssetUtils.getUserKeyAsset(1, 1, SECRET_KEY_PEM).getFile());
-        receiverKey.readPublicKey(AssetUtils.getUserKeyAsset(1, 2, PUBLIC_KEY_PEM).getFile());
+        senderKey.readPrivateKey(AssetUtils.getUserKeyAsset(1, 1, StepConstants.SECRET_KEY_PEM).getFile());
+        receiverKey.readPublicKey(AssetUtils.getUserKeyAsset(1, 2, StepConstants.PUBLIC_KEY_PEM).getFile());
 
         final List<NamedArg<?>> transferArgs = new LinkedList<>();
         final NamedArg<CLTypeU512> amountNamedArg = new NamedArg<>("amount", new CLValueU512(new BigInteger("2500000000")));
@@ -106,13 +105,13 @@ public class CLValuesDefinitions {
                 new ArrayList<>()
         );
 
-        this.contextMap.put(PUT_DEPLOY, deploy);
+        this.contextMap.put(StepConstants.PUT_DEPLOY, deploy);
     }
 
     @Then("the deploy body hash is {string}")
     public void theDeployBodyHashIs(final String bodyHash)  {
 
-        final Deploy deploy = this.contextMap.get(PUT_DEPLOY);
+        final Deploy deploy = this.contextMap.get(StepConstants.PUT_DEPLOY);
         final Digest digest = deploy.getHeader().getBodyHash();
         assertThat(digest.toString(), is(bodyHash));
     }
@@ -120,17 +119,17 @@ public class CLValuesDefinitions {
     @When("the deploy is put on chain")
     public void theDeployIsPutOnChain() {
 
-        final Deploy deploy = contextMap.get(PUT_DEPLOY);
+        final Deploy deploy = contextMap.get(StepConstants.PUT_DEPLOY);
 
         final DeployResult deployResult = casperService.putDeploy(deploy);
         assertThat(deployResult.getDeployHash(), is(notNullValue()));
-        contextMap.put(DEPLOY_RESULT, deployResult);
+        contextMap.put(StepConstants.DEPLOY_RESULT, deployResult);
     }
 
     @And("the deploy has successfully executed")
     public void theDeployHasSuccessfullyExecuted() {
 
-        final DeployResult deployResult = this.contextMap.get(DEPLOY_RESULT);
+        final DeployResult deployResult = this.contextMap.get(StepConstants.DEPLOY_RESULT);
         final DeployData deployData = DeployUtils.waitForDeploy(deployResult.getDeployHash(), 300, this.casperService);
         assertThat(deployData.getExecutionResults().get(0).getResult(), is(instanceOf(Success.class)));
     }
@@ -138,10 +137,10 @@ public class CLValuesDefinitions {
     @When("the deploy is obtained from the node")
     public void theDeployIsObtainedFromTheNode() {
 
-        final DeployResult deployResult = this.contextMap.get(DEPLOY_RESULT);
+        final DeployResult deployResult = this.contextMap.get(StepConstants.DEPLOY_RESULT);
         final DeployData deploy = this.casperService.getDeploy(deployResult.getDeployHash());
         assertThat(deploy, is(notNullValue()));
-        this.contextMap.put(GET_DEPLOY, deploy);
+        this.contextMap.put(StepConstants.GET_DEPLOY, deploy);
     }
 
     @Then("the deploys NamedArgument {string} has a value of {string} and bytes of {string}")
@@ -149,7 +148,7 @@ public class CLValuesDefinitions {
                                                              final String strValue,
                                                              final String hexBytes) {
 
-        final DeployData deploy = this.contextMap.get(GET_DEPLOY);
+        final DeployData deploy = this.contextMap.get(StepConstants.GET_DEPLOY);
         final Optional<NamedArg<?>> optionalNamedArg = deploy.getDeploy().getSession().getArgs().stream().filter(namedArg -> name.equals(namedArg.getType())).findFirst();
         assertThat(optionalNamedArg.isPresent(), is(true));
 
@@ -178,7 +177,7 @@ public class CLValuesDefinitions {
                                                                                  final String values,
                                                                                  final String bytes) throws Exception {
 
-        final DeployData deploy = this.contextMap.get(GET_DEPLOY);
+        final DeployData deploy = this.contextMap.get(StepConstants.GET_DEPLOY);
         final Optional<NamedArg<?>> optionalNamedArg = deploy.getDeploy().getSession().getArgs().stream().filter(namedArg -> name.equals(namedArg.getType())).findFirst();
         assertThat(optionalNamedArg.isPresent(), is(true));
 

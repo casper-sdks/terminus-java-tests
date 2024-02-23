@@ -1,11 +1,11 @@
 package com.stormeye.steps;
 
-import com.casper.sdk.model.stateroothash.StateRootHashData;
-import com.casper.sdk.service.CasperService;
 import com.stormeye.utils.CasperClientProvider;
 import com.stormeye.utils.ContextMap;
 import com.stormeye.utils.Nctl;
 import com.stormeye.utils.TestProperties;
+import com.casper.sdk.model.stateroothash.StateRootHashData;
+import com.casper.sdk.service.CasperService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.slf4j.Logger;

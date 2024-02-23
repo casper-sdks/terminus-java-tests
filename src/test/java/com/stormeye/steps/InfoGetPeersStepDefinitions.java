@@ -1,9 +1,9 @@
 package com.stormeye.steps;
 
-import com.casper.sdk.model.peer.PeerData;
-import com.casper.sdk.model.peer.PeerEntry;
 import com.stormeye.utils.CasperClientProvider;
 import com.stormeye.utils.ContextMap;
+import com.casper.sdk.model.peer.PeerData;
+import com.casper.sdk.model.peer.PeerEntry;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import static com.stormeye.steps.StepConstants.PEER_DATA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -33,7 +32,7 @@ public class InfoGetPeersStepDefinitions {
     public void thatTheInfo_get_peersRPCMethodIsInvokedAgainstANode() {
         logger.info("Given that the info_get_peers RPC method is invoked against a node");
         final PeerData peerData = CasperClientProvider.getInstance().getCasperService().getPeerData();
-        contextMap.put(PEER_DATA, peerData);
+        contextMap.put(StepConstants.PEER_DATA, peerData);
     }
 
     @Then("the node returns an info_get_peers_result")
@@ -68,6 +67,6 @@ public class InfoGetPeersStepDefinitions {
     }
 
     private PeerData getPeerData() {
-        return contextMap.get(PEER_DATA);
+        return contextMap.get(StepConstants.PEER_DATA);
     }
 }

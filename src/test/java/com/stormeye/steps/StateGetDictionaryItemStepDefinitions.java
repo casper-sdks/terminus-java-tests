@@ -1,5 +1,8 @@
 package com.stormeye.steps;
 
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.dictionary.StringDictionaryIdentifier;
@@ -10,9 +13,6 @@ import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueAccount;
 import com.casper.sdk.service.CasperService;
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 
-import static com.stormeye.steps.StepConstants.STATE_GET_DICTIONARY_ITEM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -65,13 +64,13 @@ public class StateGetDictionaryItemStepDefinitions {
                 key
         );
 
-        contextMap.put(STATE_GET_DICTIONARY_ITEM, dictionaryData);
+        contextMap.put(StepConstants.STATE_GET_DICTIONARY_ITEM, dictionaryData);
     }
 
     @Then("a valid state_get_dictionary_item_result is returned")
     public void aValidState_get_dictionary_item_resultIsReturned() {
         logger.info("Then a valid state_get_dictionary_item_result is returned");
-        final DictionaryData dictionaryData = contextMap.get(STATE_GET_DICTIONARY_ITEM);
+        final DictionaryData dictionaryData = contextMap.get(StepConstants.STATE_GET_DICTIONARY_ITEM);
         assertThat(dictionaryData, is(notNullValue()));
 
         final String accountHash = this.contextMap.get("accountHash");

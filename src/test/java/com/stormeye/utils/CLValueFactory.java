@@ -23,11 +23,29 @@ public class CLValueFactory {
     public AbstractCLValue<?, ?> createValue(final CLTypeData clTypeData, final String strValue) throws Exception {
 
         switch (clTypeData) {
+            case ANY:
+                return new CLValueAny(Hex.decode(strValue));
+
             case STRING:
                 return new CLValueString(strValue);
 
             case BOOL:
                 return new CLValueBool(Boolean.TRUE.toString().equalsIgnoreCase(strValue));
+
+            case BYTE_ARRAY:
+                return new CLValueByteArray(Hex.decode(strValue));
+
+            case I32:
+                return new CLValueI32(Integer.valueOf(strValue));
+
+            case I64:
+                return new CLValueI64(Long.valueOf(strValue));
+
+            case KEY:
+                return new CLValueKey(Key.fromTaggedHexString(strValue));
+
+            case PUBLIC_KEY:
+                return new CLValuePublicKey(PublicKey.fromTaggedHexString(strValue));
 
             case U8:
                 return new CLValueU8(Byte.valueOf(strValue));
@@ -38,23 +56,14 @@ public class CLValueFactory {
             case U64:
                 return new CLValueU64(new BigInteger(strValue));
 
+            case U128:
+                return new CLValueU128(new BigInteger(strValue));
+
             case U256:
                 return new CLValueU256(new BigInteger(strValue));
 
-            case I32:
-                return new CLValueI32(Integer.valueOf(strValue));
-
-            case I64:
-                return new CLValueI64(Long.valueOf(strValue));
-
-            case BYTE_ARRAY:
-                return new CLValueByteArray(Hex.decode(strValue));
-
-            case KEY:
-                return new CLValueKey(Key.fromTaggedHexString(strValue));
-
-            case PUBLIC_KEY:
-                return new CLValuePublicKey(PublicKey.fromTaggedHexString(strValue));
+            case U512:
+                return new CLValueU512(new BigInteger(strValue));
 
             case UREF:
                 return new CLValueURef(new URef(Hex.decode(strValue), URefAccessRight.READ_ADD_WRITE));
@@ -108,10 +117,10 @@ public class CLValueFactory {
         final Map<AbstractCLValue, AbstractCLValue> map = new LinkedHashMap<>();
 
         int i = 0;
-        for (AbstractCLValue<?, ?> innerValue: innerValues) {
+        for (AbstractCLValue<?, ?> innerValue : innerValues) {
             AbstractCLValue<?, ?> key = new CLValueString(Integer.toString(i++));
             map.put(key, innerValue);
         }
-        return  map;
+        return map;
     }
 }

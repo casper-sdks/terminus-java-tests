@@ -1,5 +1,11 @@
 package com.stormeye.steps;
 
+import com.stormeye.event.EventHandler;
+import com.stormeye.matcher.DeployMatchers;
+import com.stormeye.matcher.ExpiringMatcher;
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.block.JsonBlockData;
@@ -17,12 +23,6 @@ import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.event.deployaccepted.DeployAccepted;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
-import com.stormeye.event.EventHandler;
-import com.stormeye.matcher.DeployMatchers;
-import com.stormeye.matcher.ExpiringMatcher;
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import io.cucumber.java.AfterAll;
@@ -39,8 +39,8 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.*;
 
-import static com.stormeye.steps.StepConstants.*;
 import static com.stormeye.matcher.BlockAddedMatchers.hasTransferHashWithin;
+import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;

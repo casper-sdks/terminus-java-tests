@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
  * Matches an era end Step event
  */
 public class EraMatcher {
+
     private static final Logger logger = LoggerFactory.getLogger(EraMatcher.class);
 
     public static ExpiringMatcher<Event<Step>> theEraHasChanged() {
@@ -25,5 +26,4 @@ public class EraMatcher {
             }
         });
     }
-
 }
