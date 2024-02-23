@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperDeployHelper;
@@ -32,7 +32,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.stormeye.evaluation.StepConstants.*;
+import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;

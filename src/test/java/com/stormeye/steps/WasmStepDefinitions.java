@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperConstants;
@@ -41,8 +41,8 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static com.casper.sdk.helper.CasperDeployHelper.getPaymentModuleBytes;
-import static com.stormeye.evaluation.StepConstants.DEPLOY_RESULT;
-import static com.stormeye.evaluation.StepConstants.WASM_PATH;
+import static com.stormeye.steps.StepConstants.DEPLOY_RESULT;
+import static com.stormeye.steps.StepConstants.WASM_PATH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;

@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.model.balance.GetBalanceData;
 import com.casper.sdk.model.uref.URef;
@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
-import static com.stormeye.evaluation.StepConstants.EXPECTED_JSON;
-import static com.stormeye.evaluation.StepConstants.STATE_GET_BALANCE_RESULT;
+import static com.stormeye.steps.StepConstants.EXPECTED_JSON;
+import static com.stormeye.steps.StepConstants.STATE_GET_BALANCE_RESULT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;

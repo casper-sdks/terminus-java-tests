@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.helper.CasperTransferHelper;
@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import static com.stormeye.evaluation.StepConstants.*;
+import static com.stormeye.steps.StepConstants.*;
 import static com.stormeye.matcher.BlockAddedMatchers.hasTransferHashWithin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

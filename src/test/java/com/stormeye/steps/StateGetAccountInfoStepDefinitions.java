@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 
-import static com.stormeye.evaluation.StepConstants.STATE_ACCOUNT_INFO;
+import static com.stormeye.steps.StepConstants.STATE_ACCOUNT_INFO;
 import static com.stormeye.matcher.NctlMatchers.isValidMerkleProof;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

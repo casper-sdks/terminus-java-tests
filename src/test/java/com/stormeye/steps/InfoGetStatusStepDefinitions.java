@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.model.status.StatusData;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
-import static com.stormeye.evaluation.StepConstants.EXPECTED_STATUS_DATA;
-import static com.stormeye.evaluation.StepConstants.STATUS_DATA;
+import static com.stormeye.steps.StepConstants.EXPECTED_STATUS_DATA;
+import static com.stormeye.steps.StepConstants.STATUS_DATA;
 import static com.stormeye.utils.JsonUtils.getJsonValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;

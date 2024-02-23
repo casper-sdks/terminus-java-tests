@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.model.common.Ttl;

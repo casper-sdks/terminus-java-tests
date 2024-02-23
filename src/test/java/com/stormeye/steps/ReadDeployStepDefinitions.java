@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.model.clvalue.AbstractCLValue;
 import com.casper.sdk.model.clvalue.CLValueU512;

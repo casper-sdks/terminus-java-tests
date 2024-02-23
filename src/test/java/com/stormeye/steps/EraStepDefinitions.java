@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.block.JsonBlockData;

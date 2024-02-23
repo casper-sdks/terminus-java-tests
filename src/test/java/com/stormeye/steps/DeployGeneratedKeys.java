@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperKeyHelper;
@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-import static com.stormeye.evaluation.StepConstants.*;
+import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;

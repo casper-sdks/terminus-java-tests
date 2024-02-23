@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.exception.NoSuchTypeException;

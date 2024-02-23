@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.model.peer.PeerData;
 import com.casper.sdk.model.peer.PeerEntry;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import static com.stormeye.evaluation.StepConstants.PEER_DATA;
+import static com.stormeye.steps.StepConstants.PEER_DATA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;

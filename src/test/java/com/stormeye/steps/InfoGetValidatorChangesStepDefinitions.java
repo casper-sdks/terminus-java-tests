@@ -1,4 +1,4 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
 import com.casper.sdk.model.validator.ValidatorChangeData;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,8 +12,8 @@ import io.cucumber.java.en.Then;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.stormeye.evaluation.StepConstants.EXPECTED_VALIDATOR_CHANGES;
-import static com.stormeye.evaluation.StepConstants.VALIDATORS_CHANGES;
+import static com.stormeye.steps.StepConstants.EXPECTED_VALIDATOR_CHANGES;
+import static com.stormeye.steps.StepConstants.VALIDATORS_CHANGES;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
