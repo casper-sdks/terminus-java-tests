@@ -2,13 +2,22 @@
 cd "$(dirname "$0")" || exit
 echo "Bootstrap installs all dependencies."
 
-echo "Installing features from git@github.com:stormeye2000/cspr-standard-tests-resources.git"
+echo "Installing features from git@github.com:casper-sdks/terminus-test-resources.git"
 
-if [ -d "../cspr-standard-test-resources" ]
+if [ -d "../terminus-test-resources/features" ]
 then
     echo "cspr-standard-test-resources exists fetching submodules."
     git submodule update --init --recursive
+    git submodule update --remote
 else
-    echo "Cloning cspr-standard-test-resources as submodule."
-    git submodule add git@github.com:stormeye2000/cspr-standard-tests-resources.git ../cspr-standard-tests-resources
+    echo "Cloning terminus-test-resources.git as submodule."
+    git submodule add git@github.com:casper-sdks/terminus-test-resources.git ../terminus-test-resources
 fi
+
+if [ -d "../src/test/resources/features" ]
+then
+  rm ../src/test/resources/features
+fi
+
+echo "Creating features symbolic link required for IntelliJ debugging of features"
+ln -s "$(realpath "../terminus-test-resources/features")" ../src/test/resources/features
