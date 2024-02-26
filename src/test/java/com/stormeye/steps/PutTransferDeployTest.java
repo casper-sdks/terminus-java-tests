@@ -1,5 +1,7 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.TestProperties;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
@@ -8,8 +10,6 @@ import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import org.junit.jupiter.api.Test;

@@ -1,13 +1,14 @@
 package com.stormeye.utils;
 
+import com.stormeye.exception.NctlCommandException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stormeye.exception.NctlCommandException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,14 +27,13 @@ import static org.hamcrest.core.IsNull.notNullValue;
  */
 public class Nctl {
 
-    private static final Logger logger = LoggerFactory.getLogger(Nctl.class);
+    private final Logger logger = LoggerFactory.getLogger(Nctl.class);
 
     private final String dockerName;
 
     public Nctl(final String dockerName) {
         this.dockerName = dockerName;
     }
-
 
     public String getAccountMainPurse(final int userId) {
 
@@ -91,7 +91,10 @@ public class Nctl {
 
     public BigInteger geAccountBalance(final String purseUref) {
         return execute("view_chain_balance.sh", "purse-uref=" + purseUref,
-                s -> new BigInteger(s.split("=")[1].trim())
+                s -> {
+                    logger.debug("**** Account balance = {}", s);
+                    return new BigInteger(s.split("=")[1].trim());
+                }
         );
     }
 
@@ -112,7 +115,7 @@ public class Nctl {
     }
 
     private List<String> buildCommand(final String shellCommand, final String params) {
-        return List.of("bash", "-c", String.format(
+        return Arrays.asList("bash", "-c", String.format(
                 "docker exec -t %s /bin/bash -c 'source casper-node/utils/nctl/sh/views/%s %s'",
                 dockerName,
                 shellCommand,
@@ -129,7 +132,7 @@ public class Nctl {
                     .redirectErrorStream(true)
                     .start();
 
-            logger.info("Executing NCTL bash command: " + String.join(" ", params));
+            logger.debug("Executing NCTL bash command: " + String.join(" ", params));
 
             final ConsoleStream consoleStream = new ConsoleStream(process.getInputStream(), s -> response.append(s).append("\n"));
             final Future<?> future = Executors.newSingleThreadExecutor().submit(consoleStream);
@@ -158,5 +161,3 @@ public class Nctl {
         return response.replaceAll("\u001B\\[[;\\d]*m", "");
     }
 }
-
-

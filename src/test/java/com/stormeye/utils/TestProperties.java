@@ -1,11 +1,13 @@
 package com.stormeye.utils;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author ian@meywood.com
  */
+@Getter
 public class TestProperties {
 
     private final Logger logger = LoggerFactory.getLogger(TestProperties.class);
@@ -14,6 +16,7 @@ public class TestProperties {
     private final int rcpPort;
     private final int restPort;
     private final int ssePort;
+    private final int spxPort;
 
     public TestProperties() {
 
@@ -22,26 +25,7 @@ public class TestProperties {
         this.rcpPort = getIntProperty("cspr.port.rcp", 11101);
         this.restPort = getIntProperty("cspr.port.rest", 14101);
         this.ssePort = getIntProperty("cspr.port.sse", 18101);
-    }
-
-    public String getHostname() {
-        return hostname;
-    }
-
-    public int getRcpPort() {
-        return rcpPort;
-    }
-
-    public int getRestPort() {
-        return restPort;
-    }
-
-    public int getSsePort() {
-        return ssePort;
-    }
-
-    public String getDockerName() {
-        return dockerName;
+        this.spxPort = getIntProperty("cspr.port.spx", 25101);
     }
 
     private String getProperty(final String name, final String defaultValue) {

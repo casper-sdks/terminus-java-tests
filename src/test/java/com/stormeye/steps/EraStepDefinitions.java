@@ -1,5 +1,9 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
+import com.stormeye.utils.SimpleRcpClient;
+import com.stormeye.utils.TestProperties;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.block.JsonBlockData;
 import com.casper.sdk.model.common.Digest;
@@ -10,10 +14,6 @@ import com.casper.sdk.model.era.EraInfoData;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
-import com.stormeye.utils.SimpleRcpClient;
-import com.stormeye.utils.TestProperties;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

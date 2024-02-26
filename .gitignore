@@ -17,4 +17,5 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 /assets/
 /reports/
-
+# ignore the features folder as it's a
+/src/test/resources/features

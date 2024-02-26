@@ -1,5 +1,9 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
+import com.stormeye.utils.SimpleRcpClient;
+import com.stormeye.utils.TestProperties;
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.block.HeightBlockIdentifier;
@@ -11,10 +15,6 @@ import com.casper.sdk.model.era.JsonValidatorWeight;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
-import com.stormeye.utils.SimpleRcpClient;
-import com.stormeye.utils.TestProperties;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
-import static com.stormeye.evaluation.StepConstants.*;
+import static com.stormeye.steps.StepConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;

@@ -1,5 +1,8 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.casper.sdk.model.clvalue.AbstractCLValue;
 import com.casper.sdk.model.clvalue.CLValueU512;
 import com.casper.sdk.model.common.Ttl;
@@ -8,8 +11,6 @@ import com.casper.sdk.model.deploy.NamedArg;
 import com.casper.sdk.model.deploy.executabledeploy.Transfer;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.encdec.Hex;
 import dev.oak3.sbs4j.exception.ValueSerializationException;
 import io.cucumber.java.en.And;
@@ -22,7 +23,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -47,8 +50,8 @@ public class ReadDeployStepDefinitions {
 
         logger.info("Given that the {} JSON deploy is loaded", jsonFilename);
 
-        //noinspection ConstantConditions
-        final InputStream jsonIn = getClass().getResource("/json/" + jsonFilename).openStream();
+        final URL jsonUrl = AssetUtils.getStandardTestResourceURL("/json/" + jsonFilename);
+        final InputStream jsonIn = Objects.requireNonNull(jsonUrl.openStream());
         assertThat(jsonIn, is(notNullValue()));
 
         final Deploy transfer = new ObjectMapper().readValue(jsonIn, Deploy.class);

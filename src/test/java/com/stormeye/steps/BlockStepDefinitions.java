@@ -1,5 +1,9 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
+import com.stormeye.event.EventHandler;
+import com.stormeye.matcher.EraMatcher;
+import com.stormeye.matcher.ExpiringMatcher;
+import com.stormeye.utils.*;
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperTransferHelper;
@@ -22,10 +26,6 @@ import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stormeye.event.EventHandler;
-import com.stormeye.matcher.EraMatcher;
-import com.stormeye.matcher.ExpiringMatcher;
-import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import dev.oak3.sbs4j.exception.ValueSerializationException;
@@ -228,6 +228,7 @@ public class BlockStepDefinitions {
         assertThat(latestBlockSdk.getBlock().getBody(), is(notNullValue()));
         assertThat(latestBlockSdk.getBlock().getBody().getProposer().toString(), is(latestBlockNode.get("body").get("proposer").asText()));
 
+        //noinspection SizeReplaceableByIsEmpty
         if (latestBlockNode.get("body").get("deploy_hashes").size() == 0) {
             assertThat(latestBlockSdk.getBlock().getBody().getDeployHashes(), is(empty()));
         } else {
@@ -236,6 +237,7 @@ public class BlockStepDefinitions {
                     d -> assertThat(deploysLatestBlockSdk.getBlock().getBody().getDeployHashes(), hasItem(d.textValue()))
             );
         }
+        //noinspection SizeReplaceableByIsEmpty
         if (latestBlockNode.get("body").get("transfer_hashes").size() == 0) {
             assertThat(latestBlockSdk.getBlock().getBody().getTransferHashes(), is(empty()));
         } else {

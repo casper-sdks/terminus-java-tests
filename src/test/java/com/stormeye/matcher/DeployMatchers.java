@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DeployMatchers {
 
-
     private static final Logger logger = LoggerFactory.getLogger(DeployMatchers.class);
 
     public static ExpiringMatcher<Event<DeployAccepted>> theDeployIsAccepted(final String deployHash,

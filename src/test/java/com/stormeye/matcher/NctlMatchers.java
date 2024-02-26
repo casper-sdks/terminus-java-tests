@@ -18,9 +18,11 @@ public class NctlMatchers {
      * @param expectedNctlMerkelProof the response from NCTL as shown above
      * @return the request matcher for merkel proofs
      */
+    @SuppressWarnings("rawtypes")
     public static Matcher<String> isValidMerkleProof(final String expectedNctlMerkelProof) {
 
-        return new CustomMatcher<>("Nctl Merkel proof match") {
+        //noinspection unchecked
+        return new CustomMatcher("Nctl Merkel proof match") {
             @Override
             public boolean matches(final Object actual) {
                 if (actual instanceof String) {

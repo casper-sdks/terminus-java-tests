@@ -10,31 +10,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Map of EventType to list of Matchers.
+ *
  * @author ian@meywood.com
  */
 public class MatcherMap {
 
-    private final Map<EventType, List<Matcher>> eventTypeListMap = new LinkedHashMap<>();
+    private final Map<EventType, List<Matcher<?>>> eventTypeListMap = new LinkedHashMap<>();
 
     public void addEventMatcher(final EventType eventType, Matcher<?> matcher) {
         getMatchers(eventType).add(matcher);
     }
 
 
-    private List<Matcher> getMatchers(final EventType eventType) {
+    private List<Matcher<?>> getMatchers(final EventType eventType) {
         return eventTypeListMap.computeIfAbsent(eventType, k -> new ArrayList<>());
     }
 
 
     public void handleEvent(Event<?> event) {
-        //noinspection rawtypes
-        List<Matcher> matchers = getMatchers(event.getEventType());
+       final List<Matcher<?>> matchers = getMatchers(event.getEventType());
 
         matchers.forEach(matcher -> matcher.matches(event));
     }
 
     public void removeEventMatcher(EventType eventType, Matcher<?> matcher) {
-        List<Matcher> matchers = getMatchers(eventType);
+        final List<Matcher<?>> matchers = getMatchers(eventType);
         matchers.remove(matcher);
     }
 }

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Helper class for consuming and matching events.
  *
@@ -43,11 +42,14 @@ public class EventHandler {
 
     private void consume(final EventType eventType, final EventTarget eventTarget) {
 
+        logger.info("Got {} event {}", eventType, eventTarget);
         sseSources.add(
-                CasperClientProvider.getInstance().getEventService().consumeEvents(eventType, eventTarget, null, event -> {
-//                    logger.info("Got {} event {}", eventType, event);
-                    handleMatchers(event);
-                }, throwable -> logger.error("Error processing SSE event", throwable))
+                CasperClientProvider.getInstance().getEventService().consumeEvents(
+                        eventType,
+                        eventTarget, null,
+                        this::handleMatchers,
+                        throwable -> logger.error("Error processing SSE event", throwable)
+                )
         );
     }
 

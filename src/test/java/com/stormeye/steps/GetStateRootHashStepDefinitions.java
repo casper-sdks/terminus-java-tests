@@ -1,17 +1,17 @@
-package com.stormeye.evaluation;
+package com.stormeye.steps;
 
-import com.casper.sdk.model.stateroothash.StateRootHashData;
-import com.casper.sdk.service.CasperService;
 import com.stormeye.utils.CasperClientProvider;
 import com.stormeye.utils.ContextMap;
 import com.stormeye.utils.Nctl;
 import com.stormeye.utils.TestProperties;
+import com.casper.sdk.model.stateroothash.StateRootHashData;
+import com.casper.sdk.service.CasperService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.stormeye.evaluation.StepConstants.STATE_ROOT_HASH;
+import static com.stormeye.steps.StepConstants.STATE_ROOT_HASH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
