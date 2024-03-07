@@ -1,6 +1,6 @@
 package com.stormeye.steps;
 
-import com.stormeye.matcher.NctlMatchers;
+import com.stormeye.matcher.NodeMatchers;
 import com.stormeye.utils.*;
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
@@ -35,12 +35,12 @@ public class StateGetAccountInfoStepDefinitions {
 
     private final ContextMap contextMap = ContextMap.getInstance();
     private final Logger logger = LoggerFactory.getLogger(StateGetAccountInfoStepDefinitions.class);
-    private final Nctl nctl = new Nctl(new TestProperties().getDockerName());
+    private final Node node = new Node(new TestProperties().getDockerName());
 
     @Given("that the state_get_account_info RCP method is invoked against nctl")
     public void thatTheStateGetAccountInfoRcpMethodIsInvoked() throws IOException {
 
-        logger.info("Given that the state_get_account_info RCP method is invoked against nctl");
+        logger.info("Given that the state_get_account_info RCP method is invoked against the node");
 
         final String hexPublicKey = getUserOneHexPublicKey();
         final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock();
@@ -61,7 +61,7 @@ public class StateGetAccountInfoStepDefinitions {
     public void theState_get_account_info_resultContainAValidAccountHash() {
         logger.info("And the state_get_account_info_result contain a valid account hash");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
-        final String expectedAccountHash = nctl.getAccountHash(1);
+        final String expectedAccountHash = node.getAccountHash(1);
         assertThat(stateAccountInfo.getAccount().getHash(), is(expectedAccountHash));
     }
 
@@ -69,7 +69,7 @@ public class StateGetAccountInfoStepDefinitions {
     public void theState_get_account_info_resultContainAValidMainPurseUref() {
         logger.info("And the state_get_account_info_result contain a valid main purse uref");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
-        final String accountMainPurse = nctl.getAccountMainPurse(1);
+        final String accountMainPurse = node.getAccountMainPurse(1);
         assertThat(stateAccountInfo.getAccount().getMainPurse(), is(accountMainPurse));
     }
 
@@ -78,14 +78,15 @@ public class StateGetAccountInfoStepDefinitions {
         logger.info("And the state_get_account_info_result contain a valid merkle proof");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
         assertThat(stateAccountInfo.getMerkelProof(), is(notNullValue()));
-        MatcherAssert.assertThat(stateAccountInfo.getMerkelProof(), Is.is(NctlMatchers.isValidMerkleProof(nctl.getAccountMerkelProof(1))));
+        //the node does not return the Merkle proof
+        //MatcherAssert.assertThat(stateAccountInfo.getMerkelProof(), Is.is(NodeMatchers.isValidMerkleProof(node.getAccountMerkelProof(1))));
     }
 
     @And("the state_get_account_info_result contain a valid associated keys")
     public void theState_get_account_info_resultContainAValidAssociatedKeys() {
         logger.info("And the state_get_account_info_result contain a valid associated keys");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
-        final String expectedAccountHash = nctl.getAccountHash(1);
+        final String expectedAccountHash = node.getAccountHash(1);
         assertThat(stateAccountInfo.getAccount().getAssociatedKeys().get(0).getAccountHash(), is(expectedAccountHash));
         assertThat(stateAccountInfo.getAccount().getAssociatedKeys().get(0).getWeight(), is(1));
     }
@@ -95,19 +96,19 @@ public class StateGetAccountInfoStepDefinitions {
     public void theState_get_account_info_resultContainAValidActionThresholds() {
         logger.info("And the state_get_account_info_result contain a valid action thresholds");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
-        final JsonNode userAccountJson = nctl.getUserAccount(1);
+        final JsonNode userAccountJson = node.getUserAccount(1);
         final ActionThresholds deployment = stateAccountInfo.getAccount().getDeployment();
         assertThat(deployment, is(notNullValue()));
-        assertThat(deployment.getDeployment(), is(userAccountJson.at("/stored_value/Account/action_thresholds/deployment").asInt()));
-        assertThat(deployment.getKeyManagement(), is(userAccountJson.at("/stored_value/Account/action_thresholds/key_management").asInt()));
+        assertThat(deployment.getDeployment(), is(userAccountJson.at("/action_thresholds/deployment").asInt()));
+        assertThat(deployment.getKeyManagement(), is(userAccountJson.at("/action_thresholds/key_management").asInt()));
     }
 
     @And("the state_get_account_info_result contain a valid named keys")
     public void theState_get_account_info_resultContainAValidNamedKeys() {
         logger.info("And the state_get_account_info_result contain a valid action thresholds");
         final AccountData stateAccountInfo = contextMap.get(StepConstants.STATE_ACCOUNT_INFO);
-        final JsonNode userAccountJson = nctl.getUserAccount(1);
-        assertThat(stateAccountInfo.getAccount().getNamedKeys().size(), is(userAccountJson.at("/stored_value/Account/named_keys").size()));
+        final JsonNode userAccountJson = node.getUserAccount(1);
+        assertThat(stateAccountInfo.getAccount().getNamedKeys().size(), is(userAccountJson.at("/named_keys").size()));
     }
 
     private static String getUserOneHexPublicKey() throws IOException {

@@ -23,6 +23,7 @@ import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.event.deployaccepted.DeployAccepted;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import io.cucumber.java.AfterAll;
@@ -57,6 +58,7 @@ public class DeployStepDefinitions {
     private final ContextMap contextMap = ContextMap.getInstance();
     private final Logger logger = LoggerFactory.getLogger(DeployStepDefinitions.class);
     private static EventHandler eventHandler;
+    private final TestProperties testProperties = new TestProperties();
 
     @BeforeAll
     public static void setUp() {
@@ -121,7 +123,7 @@ public class DeployStepDefinitions {
                 contextMap.get(SENDER_KEY),
                 PublicKey.fromAbstractPublicKey(contextMap.get(RECEIVER_KEY)),
                 contextMap.get(TRANSFER_AMOUNT),
-                chainName,
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(100000000L),
                 contextMap.get(GAS_PRICE),

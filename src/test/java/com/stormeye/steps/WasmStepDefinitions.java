@@ -57,6 +57,7 @@ public class WasmStepDefinitions {
     private final Logger logger = LoggerFactory.getLogger(StateGetDictionaryItemStepDefinitions.class);
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
 
+    private final TestProperties testProperties = new TestProperties();
     @Given("that a smart contract {string} is located in the {string} folder")
     public void thatASmartContractIsInTheFolder(String wasmFileName, String contractsFolder) throws IOException {
         logger.info("Give that a smart contract {string} is in the {string} folder");
@@ -75,7 +76,7 @@ public class WasmStepDefinitions {
         final byte[] bytes = IOUtils.readBytesFromStream(resource.openStream());
         assertThat(bytes.length, is(189336));
 
-        final String chainName = "casper-net-1";
+        final String chainName = testProperties.getChainName();
         final BigInteger payment = new BigInteger("200000000000");
         final byte tokenDecimals = 11;
         final String tokenName = "Acme Token";
@@ -251,7 +252,7 @@ public class WasmStepDefinitions {
 
         final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
 
-        final String chainName = "casper-net-1";
+        final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,
@@ -304,7 +305,7 @@ public class WasmStepDefinitions {
 
         final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
 
-        final String chainName = "casper-net-1";
+        final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,
@@ -344,7 +345,7 @@ public class WasmStepDefinitions {
 
         final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
 
-        final String chainName = "casper-net-1";
+        final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,
@@ -386,7 +387,7 @@ public class WasmStepDefinitions {
 
         final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
 
-        final String chainName = "casper-net-1";
+        final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,

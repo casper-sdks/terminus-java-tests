@@ -35,7 +35,7 @@ public class AssetUtils {
 
     public static URL getStandardTestResourceURL(String jsonFilename) throws MalformedURLException {
         final Path currentRelativePath = Paths.get("");
-        final String jsonPath = "file://" + currentRelativePath.toAbsolutePath() + "/sdk-std-test-resources" + jsonFilename;
+        final String jsonPath = "file://" + currentRelativePath.toAbsolutePath() + "/terminus-test-resources" + jsonFilename;
         return new URL(jsonPath);
     }
 

@@ -69,7 +69,7 @@ public class BlockStepDefinitions {
     private static EventHandler eraEventHandler;
     private final ObjectMapper mapper = new ObjectMapper();
     private final TestProperties testProperties = new TestProperties();
-    private final Nctl nctl = new Nctl(testProperties.getDockerName());
+    private final Node node = new Node(testProperties.getDockerName());
 
     @BeforeAll
     public static void setUp() {
@@ -154,52 +154,22 @@ public class BlockStepDefinitions {
     @Then("request the latest block via the test node")
     public void requestTheLatestBlockViaTheTestNode() {
         logger.info("Then request the latest block via the test node");
-        contextMap.put("blockDataNode", nctl.getChainBlock(""));
+        contextMap.put("blockDataNode", node.getChainBlock(""));
     }
 
     @Then("request a block by hash via the test node")
     public void requestABlockByHashViaTheTestNode() {
         logger.info("Then request a block by hash via the test node");
 
-        contextMap.put("blockDataNode", nctl.getChainBlock(contextMap.get("latestBlock")));
+        contextMap.put("blockDataNode", node.getChainBlock(contextMap.get("latestBlock")));
     }
 
     @Then("request the returned block from the test node via its hash")
     public void requestTheReturnedBlockFromTheTestNodeViaItsHash() {
         logger.info("Then request the returned block from the test node via its hash");
 
-        //NCTL doesn't have get block via height, so we use the sdk's returned block has
-        contextMap.put("blockDataNode", nctl.getChainBlock(contextMap.get("blockHashSdk")));
-    }
-
-    @Given("that a test node era switch block is requested")
-    public void thatATestNodeEraSwitchBlockIsRequested() {
-
-        logger.info("Given that a test node era switch block is requested");
-
-        contextMap.put("nodeEraSwitchBlockResult", nctl.getChainEraInfo());
-    }
-
-    @Then("wait for the the test node era switch block step event")
-    public void waitForTheTheTestNodeEraSwitchBlock() throws Exception {
-        logger.info("Then wait for the test node era switch block step event");
-
-        final ExpiringMatcher<Event<Step>> matcher = (ExpiringMatcher<Event<Step>>) eraEventHandler.addEventMatcher(
-                EventType.MAIN,
-                EraMatcher.theEraHasChanged()
-        );
-
-        assertThat(matcher.waitForMatch(5000L), is(true));
-
-        final JsonNode result = nctl.getChainEraInfo();
-
-        eraEventHandler.removeEventMatcher(EventType.MAIN, matcher);
-
-        assertThat(result.get("era_summary").get("block_hash").textValue(), is(notNullValue()));
-        validateBlockHash(new Digest(result.get("era_summary").get("block_hash").textValue()));
-
-        contextMap.put("nodeEraSwitchBlock", result.get("era_summary").get("block_hash").textValue());
-        contextMap.put("nodeEraSwitchData", result);
+        //The node doesn't have get block via height, so we use the sdk's returned block has
+        contextMap.put("blockDataNode", node.getChainBlock(contextMap.get("blockHashSdk")));
     }
 
     @Then("request the block transfer from the test node")
@@ -208,7 +178,8 @@ public class BlockStepDefinitions {
         logger.info("Then request the block transfer from the test node");
 
         final TransferData transferData = contextMap.get("transferBlockSdk");
-        contextMap.put("transferBlockNode", nctl.getChainBlockTransfers(transferData.getBlockHash()));
+
+        contextMap.put("transferBlockNode", node.getChainBlock(transferData.getBlockHash()));
     }
 
     @Then("the body of the returned block is equal to the body of the returned test node block")
@@ -220,7 +191,7 @@ public class BlockStepDefinitions {
         final JsonNode latestBlockNode = mapper.readTree(contextMap.get("blockDataNode").toString());
 
         if (!latestBlockSdk.getBlock().getHash().toString().equals(latestBlockNode.get("hash").asText())) {
-            //Fixes intermittent syncing issues with nctl/sdk latest blocks
+            //Fixes intermittent syncing issues with node/sdk latest blocks
             latestBlockSdk = getCasperService().getBlock();
             contextMap.put("blockDataSdk", latestBlockSdk);
         }
@@ -325,7 +296,7 @@ public class BlockStepDefinitions {
                 contextMap.get("senderKey"),
                 PublicKey.fromAbstractPublicKey(contextMap.get("receiverKey")),
                 contextMap.get("transferAmount"),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(100000000L),
                 contextMap.get("gasPrice"),
