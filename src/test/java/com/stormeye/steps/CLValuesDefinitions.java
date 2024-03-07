@@ -51,6 +51,8 @@ public class CLValuesDefinitions {
 
     private final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
 
+    private final TestProperties testProperties = new TestProperties();
+
     @Given("that a CL value of type {string} has a value of {string}")
     public void thatACLValueOfTypeHasAValueOf(final String typeName, final String strValue) throws Exception {
 
@@ -96,7 +98,7 @@ public class CLValuesDefinitions {
 
         final Deploy deploy = CasperDeployHelper.buildDeploy(
                 senderKey,
-                "casper-net-1",
+                testProperties.getChainName(),
                 session,
                 payment,
                 1L,
