@@ -1,13 +1,13 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.DeployUtils;
 import com.casper.sdk.model.clvalue.*;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployData;
 import com.casper.sdk.model.deploy.DeployResult;
 import com.casper.sdk.model.deploy.NamedArg;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.DeployUtils;
 import dev.oak3.sbs4j.exception.ValueSerializationException;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -28,6 +28,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 /**
  * Step definitions for the nested map feature.
+ *
  * @author ian@meywood.com
  */
 public class NestedMapStepDefinitions {
@@ -106,17 +107,9 @@ public class NestedMapStepDefinitions {
         deployResult = CasperClientProvider.getInstance().getCasperService().putDeploy(deploy);
     }
 
-    @And("the transfer containing the nested map is successfully executed")
-    public void theTransferIsSuccessful() {
-        deployData = DeployUtils.waitForDeploy(
-                deployResult.getDeployHash(),
-                300,
-                CasperClientProvider.getInstance().getCasperService()
-        );
-
-    }
 
     @Given("a nested map is created  \\{{int}: \\{{int}: \\{{int}: {string}}, {int}: \\{{int}: {string}}}, {int}: \\{{int}: \\{{int}: {string}}, {int}: \\{{int}: {string}}}}")
+    @SuppressWarnings({"ReassignedVariable", "unchecked, rawtypes"})
     public void aMapIsCreated(final int key1,
                               final int key11,
                               final int key111,
@@ -132,31 +125,46 @@ public class NestedMapStepDefinitions {
                               final int key221,
                               final String value221) throws Exception {
 
+        Map internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key111)), new CLValueString(value111));
+        final CLValueMap innerMap111 = new CLValueMap(internalMap);
 
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap111 = new LinkedHashMap<>();
-        innerMap111.put(new CLValueU256(BigInteger.valueOf(key111)), new CLValueString(value111));
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap121 = new LinkedHashMap<>();
-        innerMap121.put(new CLValueU32((long) key121), new CLValueString(value121));
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key121)), new CLValueString(value121));
+        final CLValueMap innerMap121 = new CLValueMap(internalMap);
 
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap11 = new LinkedHashMap<>();
-        innerMap11.put(new CLValueU256(BigInteger.valueOf(key11)), new CLValueMap(innerMap111));
-        innerMap11.put(new CLValueU256(BigInteger.valueOf(key12)), new CLValueMap(innerMap121));
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key11)), innerMap111);
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key12)), innerMap121);
+        final CLValueMap innerMap1 = new CLValueMap(internalMap);
 
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key211)), new CLValueString(value211));
+        final CLValueMap innerMap21 = new CLValueMap(internalMap);
 
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap211 = new LinkedHashMap<>();
-        innerMap211.put(new CLValueU256(BigInteger.valueOf(key211)), new CLValueString(value211));
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap221 = new LinkedHashMap<>();
-        innerMap221.put(new CLValueU32((long) key221), new CLValueString(value221));
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key221)), new CLValueString(value221));
+        final CLValueMap innerMap22 = new CLValueMap(internalMap);
 
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> innerMap21 = new LinkedHashMap<>();
-        innerMap21.put(new CLValueU256(BigInteger.valueOf(key21)), new CLValueMap(innerMap211));
-        innerMap21.put(new CLValueU256(BigInteger.valueOf(key22)), new CLValueMap(innerMap221));
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key21)), innerMap21);
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key22)), innerMap22);
+        final CLValueMap innerMap2 = new CLValueMap(internalMap);
 
-        final Map<AbstractCLValue<?, ?>, AbstractCLValue<?, ?>> rootMap = new LinkedHashMap<>();
-        rootMap.put(new CLValueU256(BigInteger.valueOf(key1)), new CLValueMap(innerMap11));
-        rootMap.put(new CLValueU256(BigInteger.valueOf(key2)), new CLValueMap(innerMap21));
+        internalMap = new LinkedHashMap<>();
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key1)), innerMap1);
+        internalMap.put(new CLValueU256(BigInteger.valueOf(key2)), innerMap2);
+        map = new CLValueMap(internalMap);
+    }
 
-        map = new CLValueMap(rootMap);
+    @And("the transfer containing the nested map is successfully executed")
+    public void theTransferIsSuccessful() {
+        deployData = DeployUtils.waitForDeploy(
+                deployResult.getDeployHash(),
+                300,
+                CasperClientProvider.getInstance().getCasperService()
+        );
+
     }
 
     @When("the map is read from the deploy")
@@ -175,13 +183,12 @@ public class NestedMapStepDefinitions {
         assertThat(innerMap.get(key).getValue().toString(), is(strValue));
     }
 
-    @SuppressWarnings("unchecked")
     @And("the 1st nested map's key is {string} and value is {string}")
     public void theStNestedMapSKeyIsAndValueIs(final String strKey, final String strValue) throws ValueSerializationException {
         final CLValueString key = new CLValueString(strKey);
-        final Map<CLValueString, CLValueMap> innerMap = (Map<CLValueString, CLValueMap>) map.getValue().values().iterator().next().getValue();
+        final CLValueMap innerMap = (CLValueMap) map.getValue().values().iterator().next();
         assertThat(innerMap, is(notNullValue()));
-        assertThat(innerMap.containsKey(key), is(true));
-        assertThat(innerMap.get(key).getValue().toString(), is(strValue));
+        assertThat(innerMap.getValue().containsKey(key), is(true));
+        assertThat(innerMap.getValue().get(key).toString(), is(strValue));
     }
 }
