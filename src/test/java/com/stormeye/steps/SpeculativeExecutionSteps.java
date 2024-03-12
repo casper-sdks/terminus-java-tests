@@ -12,6 +12,7 @@ import com.casper.sdk.model.deploy.executionresult.Success;
 import com.casper.sdk.model.deploy.transform.*;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.AbstractPrivateKey;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -44,7 +45,7 @@ public class SpeculativeExecutionSteps {
     private SpeculativeDeployData speculativeDeployData;
     private Entry transform;
     private Deploy deploy;
-
+    private final TestProperties testProperties = new TestProperties();
     @Given("that the {string} account transfers {long} to user-{int} account with a gas payment amount of {long} using the speculative_exec RPC API")
     public void thatTheFaucetAccountTransfersToUserAccountUsingTheSpeculative_execRPCAPI(final String faucet,
                                                                                          final long transferAmount,
@@ -57,7 +58,7 @@ public class SpeculativeExecutionSteps {
                 faucetPrivateKey,
                 userPublicKey,
                 BigInteger.valueOf(transferAmount),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(paymentAmount),
                 1L,

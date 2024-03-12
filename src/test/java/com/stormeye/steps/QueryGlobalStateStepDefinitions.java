@@ -58,8 +58,8 @@ public class QueryGlobalStateStepDefinitions {
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
     private final Logger logger = LoggerFactory.getLogger(QueryGlobalStateStepDefinitions.class);
     private static final EventHandler eventHandler = new EventHandler(EventTarget.POJO);
-    private final Nctl nctl = new Nctl(new TestProperties().getDockerName());
-
+    private final Node node = new Node(new TestProperties().getDockerName());
+    private final TestProperties testProperties = new TestProperties();
     @After
     public static void after() {
         eventHandler.close();
@@ -125,7 +125,7 @@ public class QueryGlobalStateStepDefinitions {
     public void theQuery_global_state_resultSStoredValueSFromIsTheUserAccountHash(int userId) {
 
         logger.info("And the query_global_state_result's stored value from is the user-{int} account hash");
-        final String accountHash = nctl.getAccountHash(userId);
+        final String accountHash = node.getAccountHash(userId);
         final DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
         assertThat(storedValueDeployInfo.getFrom(), is(accountHash));
     }
@@ -149,7 +149,7 @@ public class QueryGlobalStateStepDefinitions {
     public void theQuery_global_state_resultSStoredValueContainsTheTransferSource() {
         logger.info("And the query_global_state_result stored value contains the transfer source uref");
         final DeployInfo storedValueDeployInfo = getGlobalDataDataStoredValue();
-        final String accountMainPurse = nctl.getAccountMainPurse(1);
+        final String accountMainPurse = node.getAccountMainPurse(1);
         assertThat(storedValueDeployInfo.getSource().getJsonURef(), is(accountMainPurse));
     }
 
@@ -170,7 +170,7 @@ public class QueryGlobalStateStepDefinitions {
         logger.info("When the query_global_state RCP method is invoked with the state root hash as the query identifier");
         final StateRootHashData stateRootHash = contextMap.get(StepConstants.STATE_ROOT_HASH);
         StateRootHashIdentifier globalStateIdentifier = new StateRootHashIdentifier(stateRootHash.getStateRootHash());
-        // Need to invoke nctl-view-faucet-account to get uref
+        // Need to invoke cctl-view-faucet-account to get uref
         final String key = "uref-d0343bb766946f9f850a67765aae267044fa79a6cd50235ffff248a37534";
         try {
             casperService.queryGlobalState(globalStateIdentifier, key, new String[0]);
@@ -232,7 +232,7 @@ public class QueryGlobalStateStepDefinitions {
                 senderKey,
                 PublicKey.fromAbstractPublicKey(receiverKey),
                 BigInteger.valueOf(2500000000L),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(100000000L),
                 1L,

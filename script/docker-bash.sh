@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker exec -it cspr-nctl bash
+docker exec -it cspr-cctl bash

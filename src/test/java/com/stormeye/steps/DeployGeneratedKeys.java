@@ -14,6 +14,7 @@ import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.AbstractPrivateKey;
 import com.syntifi.crypto.key.AbstractPublicKey;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
@@ -47,6 +48,7 @@ public class DeployGeneratedKeys {
 
     private final ContextMap contextMap = ContextMap.getInstance();
     private final Logger logger = LoggerFactory.getLogger(DeployGeneratedKeys.class);
+    private final TestProperties testProperties = new TestProperties();
 
     @BeforeAll
     public static void setUp() {
@@ -152,7 +154,7 @@ public class DeployGeneratedKeys {
                 sk,
                 PublicKey.fromAbstractPublicKey(pk),
                 BigInteger.valueOf(contextMap.get(StepConstants.TRANSFER_AMOUNT)),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(contextMap.get(StepConstants.PAYMENT_AMOUNT)),
                 1L,

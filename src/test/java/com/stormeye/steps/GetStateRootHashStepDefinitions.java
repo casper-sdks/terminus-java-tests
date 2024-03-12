@@ -2,7 +2,7 @@ package com.stormeye.steps;
 
 import com.stormeye.utils.CasperClientProvider;
 import com.stormeye.utils.ContextMap;
-import com.stormeye.utils.Nctl;
+import com.stormeye.utils.Node;
 import com.stormeye.utils.TestProperties;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.service.CasperService;
@@ -26,7 +26,7 @@ public class GetStateRootHashStepDefinitions {
     private final ContextMap contextMap = ContextMap.getInstance();
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
     private final Logger logger = LoggerFactory.getLogger(QueryGlobalStateStepDefinitions.class);
-    private final Nctl nctl = new Nctl(new TestProperties().getDockerName());
+    private final Node node = new Node(new TestProperties().getDockerName());
 
     @Given("that the chain_get_state_root_hash RCP method is invoked against nctl")
     public void thatTheChain_get_state_root_hashRCPMethodIsInvoked() {
@@ -41,7 +41,7 @@ public class GetStateRootHashStepDefinitions {
         final StateRootHashData stateRootHashData = contextMap.get(STATE_ROOT_HASH);
         assertThat(stateRootHashData, is(notNullValue()));
 
-        final String expectedStateRootHash = nctl.getStateRootHash(1);
+        final String expectedStateRootHash = node.getStateRootHash(1);
         assertThat(stateRootHashData.getStateRootHash(), is(expectedStateRootHash));
     }
 }

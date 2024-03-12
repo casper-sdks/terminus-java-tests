@@ -138,7 +138,7 @@ public class QueryBalanceStepDefinitions {
                 faucetPrivateKey,
                 userPublicKey,
                 BigInteger.valueOf(amount),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(100000000L),
                 1L,
