@@ -87,7 +87,6 @@ public class DeployGeneratedKeys {
             throw new NoSuchTypeException("Unknown algorithm");
         }
 
-
         contextMap.put(StepConstants.SENDER_KEY_SK, sk);
         contextMap.put(StepConstants.SENDER_KEY_PK, pk);
     }
@@ -115,16 +114,8 @@ public class DeployGeneratedKeys {
         byte[] signature = sk.sign(msg);
         assertTrue(pk.verify(msg, signature));
 
-
-        if ("Ed25519".equals(algo)) {
-            assertThat(sk.getKey(), is(notNullValue()));
-            assertThat(pk.getKey(), is(notNullValue()));
-        } else if ("Secp256k1".equals(algo)) {
-            assertThat(((Secp256k1PrivateKey) sk).getKeyPair().getPrivateKey(), is(notNullValue()));
-            assertThat(pk.getKey(), is(notNullValue()));
-        } else {
-            throw new NoSuchTypeException("Unknown algorithm");
-        }
+        assertThat(sk.getKey(), is(notNullValue()));
+        assertThat(pk.getKey(), is(notNullValue()));
 
         contextMap.put(StepConstants.RECEIVER_KEY, pk);
     }

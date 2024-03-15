@@ -41,8 +41,11 @@ public abstract class StepConstants {
     public static final String TTL = "ttl";
     public static final String VALIDATORS_CHANGES = "validatorsChanges";
     public static final String WASM_PATH = "wasmPath";
+    public static final String READ_KEY = "readKey" ;
+    public static final String SENDER_KEY_SK_PATH = "keyPath";
 
-    private StepConstants() {
+    private StepConstants()
+    {
         // prevent construction
     }
 }
