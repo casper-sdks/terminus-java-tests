@@ -30,12 +30,12 @@ public class InfoGetStatusStepDefinitions {
 
     private final ContextMap contextMap = ContextMap.getInstance();
     private final Logger logger = LoggerFactory.getLogger(InfoGetStatusStepDefinitions.class);
-    private final Nctl nctl = new Nctl(new TestProperties().getDockerName());
-
+    private final Node node = new Node(new TestProperties().getDockerName());
+    private final TestProperties testProperties = new TestProperties();
     @Given("that the info_get_status is invoked against nctl")
     public void thatTheInfo_get_statusIsInvoked() {
 
-        final JsonNode expectedJsonNodeStatus = nctl.getNodeStatus(1);
+        final JsonNode expectedJsonNodeStatus = node.getNodeStatus(1);
         assertThat(expectedJsonNodeStatus, is(notNullValue()));
         contextMap.put(StepConstants.EXPECTED_STATUS_DATA, expectedJsonNodeStatus);
 
@@ -59,7 +59,7 @@ public class InfoGetStatusStepDefinitions {
     @And("the info_get_status_result chainspec_name is {string}")
     public void theInfo_get_status_resultChainspec_nameIs(String chainSpecName) {
         final StatusData statusData = contextMap.get(StepConstants.STATUS_DATA);
-        assertThat(statusData.getChainSpecName(), is(chainSpecName));
+        assertThat(statusData.getChainSpecName(), is(testProperties.getChainName()));
     }
 
     @And("the info_get_status_result has a valid last_added_block_info")

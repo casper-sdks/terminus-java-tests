@@ -24,6 +24,9 @@ import java.util.*;
  * @author ian@meywood.com
  */
 public class DeployUtils {
+
+    private static final TestProperties testProperties = new TestProperties();
+
     public static DeployData waitForDeploy(final String deployHash,
                                            final int timeoutSeconds,
                                            final CasperService casperService) {
@@ -75,7 +78,7 @@ public class DeployUtils {
 
         return CasperDeployHelper.buildDeploy(
                 senderKey,
-                "casper-net-1",
+                testProperties.getChainName(),
                 session,
                 payment,
                 1L,

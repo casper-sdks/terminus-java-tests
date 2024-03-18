@@ -1,6 +1,6 @@
 package com.stormeye.utils;
 
-import com.stormeye.exception.NctlCommandException;
+import com.stormeye.exception.NodeCommandException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,23 +21,23 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 /**
- * A class that executes NCTL shell commands against a node.
+ * A class that executes shell commands against a node.
  *
  * @author ian@meywood.com
  */
-public class Nctl {
+public class Node {
 
-    private final Logger logger = LoggerFactory.getLogger(Nctl.class);
+    private final Logger logger = LoggerFactory.getLogger(Node.class);
 
     private final String dockerName;
 
-    public Nctl(final String dockerName) {
+    public Node(final String dockerName) {
         this.dockerName = dockerName;
     }
 
     public String getAccountMainPurse(final int userId) {
 
-        final JsonNode node = execute("view_user_account.sh", "user=" + userId, s -> {
+        final JsonNode node = execute("cctl-chain-view-account-of-user", "user=" + userId, s -> {
             try {
                 return new ObjectMapper().readTree(s.substring(s.indexOf("{")));
             } catch (JsonProcessingException e) {
@@ -45,21 +45,23 @@ public class Nctl {
             }
         });
 
-        final String mainPurse = JsonUtils.getJsonValue(node, "/stored_value/Account/main_purse");
+        final String mainPurse = JsonUtils.getJsonValue(node, "/main_purse");
         assertThat(mainPurse, is(notNullValue()));
         assertThat(mainPurse, startsWith("uref-"));
         return mainPurse;
     }
 
     public String getStateRootHash(final int nodeId) {
-        return execute("view_chain_state_root_hash.sh", "node=" + nodeId, s ->
-                s.split("=")[1].trim()
+        return execute("cctl-chain-view-state-root-hash", "node=" + nodeId, s -> {
+                    var nodes = s.split("\n");
+                    return nodes[nodeId - 1].split("=")[1].trim();
+                }
         );
     }
 
     public String getAccountHash(final int userId) {
         final JsonNode node = getUserAccount(userId);
-        final String accountHash = JsonUtils.getJsonValue(node, "/stored_value/Account/account_hash");
+        final String accountHash = JsonUtils.getJsonValue(node, "/account_hash");
         assertThat(accountHash, is(notNullValue()));
         assertThat(accountHash, startsWith("account-hash-"));
         return accountHash;
@@ -74,11 +76,11 @@ public class Nctl {
     }
 
     public JsonNode getUserAccount(final int userId) {
-        return execute("view_user_account.sh", "user=" + userId, Nctl::removePreamble);
+        return execute("cctl-chain-view-account-of-user", "user=" + userId, Node::removePreamble);
     }
 
     public JsonNode getNodeStatus(final int nodeId) {
-        return execute("view_node_status.sh", "node=" + nodeId, Nctl::removePreamble);
+        return execute("cctl-infra-node-view-status", "node=" + nodeId, Node::removePreamble);
     }
 
     static JsonNode removePreamble(final String response) {
@@ -89,34 +91,13 @@ public class Nctl {
         }
     }
 
-    public BigInteger geAccountBalance(final String purseUref) {
-        return execute("view_chain_balance.sh", "purse-uref=" + purseUref,
-                s -> {
-                    logger.debug("**** Account balance = {}", s);
-                    return new BigInteger(s.split("=")[1].trim());
-                }
-        );
-    }
-
-    public JsonNode getStateAuctionInfo() {
-        return execute("view_chain_auction_info.sh", null);
-    }
-
     public JsonNode getChainBlock(final String blockHash) {
-        return execute("view_chain_block.sh", "block=" + blockHash);
-    }
-
-    public JsonNode getChainEraInfo() {
-        return execute("view_chain_era_info.sh", null);
-    }
-
-    public JsonNode getChainBlockTransfers(final String blockHash) {
-        return execute("view_chain_block_transfers.sh", "block=" + blockHash);
+        return execute("cctl-chain-view-block", "block=" + blockHash);
     }
 
     private List<String> buildCommand(final String shellCommand, final String params) {
         return Arrays.asList("bash", "-c", String.format(
-                "docker exec -t %s /bin/bash -c 'source casper-node/utils/nctl/sh/views/%s %s'",
+                "docker exec -t %s /bin/bash -c -i '%s %s'",
                 dockerName,
                 shellCommand,
                 params != null ? params : "")
@@ -132,7 +113,7 @@ public class Nctl {
                     .redirectErrorStream(true)
                     .start();
 
-            logger.debug("Executing NCTL bash command: " + String.join(" ", params));
+            logger.debug("Executing node bash command: " + String.join(" ", params));
 
             final ConsoleStream consoleStream = new ConsoleStream(process.getInputStream(), s -> response.append(s).append("\n"));
             final Future<?> future = Executors.newSingleThreadExecutor().submit(consoleStream);
@@ -140,7 +121,7 @@ public class Nctl {
             process.waitFor();
 
             if (process.exitValue() != 0) {
-                throw new NctlCommandException(Integer.toString(process.exitValue()));
+                throw new NodeCommandException(Integer.toString(process.exitValue()));
             }
 
             future.get(10, TimeUnit.SECONDS);
@@ -148,7 +129,7 @@ public class Nctl {
             return responseFunction.apply(replaceAnsiConsoleCodes(response.toString()));
 
         } catch (Exception e) {
-            throw new NctlCommandException(e);
+            throw new NodeCommandException(e);
         }
     }
 

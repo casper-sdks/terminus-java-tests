@@ -51,7 +51,7 @@ public class PutTransferDeployTest {
                 senderKey,
                 PublicKey.fromAbstractPublicKey(receiverKey),
                 BigInteger.valueOf(2500000000L),
-                "casper-net-1",
+                testProperties.getChainName(),
                 Math.abs(new Random().nextLong()),
                 BigInteger.valueOf(100000000L),
                 1L,
@@ -96,7 +96,7 @@ public class PutTransferDeployTest {
 
 
     /**
-     * Obtains the user key from nctl assets folder
+     * Obtains the user key from cctl assets folder
      */
     public static URL getUserKeyAsset(final int networkId, final int userId, final String keyFilename) {
         String path = String.format("/net-%d/user-%d/%s", networkId, userId, keyFilename);

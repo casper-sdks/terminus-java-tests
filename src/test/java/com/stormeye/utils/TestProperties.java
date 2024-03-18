@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 public class TestProperties {
 
     private final Logger logger = LoggerFactory.getLogger(TestProperties.class);
+    private final String chainName;
     private final String hostname;
     private final String dockerName;
     private final int rcpPort;
@@ -21,11 +22,12 @@ public class TestProperties {
     public TestProperties() {
 
         this.hostname = getProperty("cspr.hostname", "localhost");
-        this.dockerName = getProperty("cspr.docker.name", "cspr-nctl");
+        this.dockerName = getProperty("cspr.docker.name", "cspr-cctl");
         this.rcpPort = getIntProperty("cspr.port.rcp", 11101);
         this.restPort = getIntProperty("cspr.port.rest", 14101);
         this.ssePort = getIntProperty("cspr.port.sse", 18101);
         this.spxPort = getIntProperty("cspr.port.spx", 25101);
+        this.chainName = getProperty("cspr.chain.name", "cspr-dev-cctl");
     }
 
     private String getProperty(final String name, final String defaultValue) {

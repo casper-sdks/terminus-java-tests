@@ -30,15 +30,15 @@ public class StateGetBalanceStepDefinitions {
     private final Logger logger = LoggerFactory.getLogger(StateGetBalanceStepDefinitions.class);
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
     private final TestProperties testProperties = new TestProperties();
-    private final Nctl nctl = new Nctl(testProperties.getDockerName());
+    private final Node node = new Node(testProperties.getDockerName());
     private final SimpleRcpClient simpleRcpClient = new SimpleRcpClient(testProperties.getHostname(), testProperties.getRcpPort());
 
 
     @Given("that the state_get_balance RPC method is invoked against nclt user-1 purse")
     public void thatTheState_get_balanceRPCMethodIsInvoked() throws Exception {
         logger.info("Given that the state_get_balance RPC method is invoked");
-        final String stateRootHash = nctl.getStateRootHash(1);
-        final String accountMainPurse = nctl.getAccountMainPurse(1);
+        final String stateRootHash = node.getStateRootHash(1);
+        final String accountMainPurse = node.getAccountMainPurse(1);
         final GetBalanceData balance = casperService.getBalance(stateRootHash, URef.fromString(accountMainPurse));
         contextMap.put(STATE_GET_BALANCE_RESULT, balance);
         final JsonNode json = simpleRcpClient.getBalance(stateRootHash, accountMainPurse);
@@ -55,9 +55,9 @@ public class StateGetBalanceStepDefinitions {
     @And("the state_get_balance_result contains the purse amount")
     public void theState_get_balance_resultContainsThePurseAmount() throws Exception {
         logger.info("And the state_get_balance_result contains the purse amount");
-        final String accountMainPurse = nctl.getAccountMainPurse(1);
+        final String accountMainPurse = node.getAccountMainPurse(1);
 
-        final JsonNode json = simpleRcpClient.getBalance(nctl.getStateRootHash(1), accountMainPurse);
+        final JsonNode json = simpleRcpClient.getBalance(node.getStateRootHash(1), accountMainPurse);
         final BigInteger balance = new BigInteger(json.findPath("balance_value").asText());
 
         final GetBalanceData balanceData = contextMap.get(STATE_GET_BALANCE_RESULT);
