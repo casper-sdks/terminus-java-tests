@@ -10,6 +10,7 @@ Points to note are:
 - Tests will run automatically on a push to main within the SDK repo
 - Tests can be run manually within this repos action tab
 - The tests are built using Cucumber features
+- **Java 11** or greater is required to run the tests
 
 ### Obtaining Dependencies *(cspr-standard-test-resources submodule)*
 The cucumber test features and their required test resources are maintained in their own repository. To obtain these resources execute the bootstrap script:
