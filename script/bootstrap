@@ -17,7 +17,11 @@ fi
 if [ -d "../src/test/resources/features" ]
 then
   rm ../src/test/resources/features
+  rm ../src/test/resources/contracts
+  rm ../src/test/resources/json
 fi
 
 echo "Creating features symbolic link required for IntelliJ debugging of features"
 ln -s "$(realpath "../terminus-test-resources/features")" ../src/test/resources/features
+ln -s "$(realpath "../terminus-test-resources/contracts")" ../src/test/resources/contracts
+ln -s "$(realpath "../terminus-test-resources/json")" ../src/test/resources/json

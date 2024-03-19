@@ -16,6 +16,9 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 /assets/
+/lib/
 /reports/
-# ignore the features folder as it's a
+# ignore the features folder and associated resouces as they are symlinked from the git sub-project
 /src/test/resources/features
+/src/test/resources/json/
+/src/test/resources/contracts/

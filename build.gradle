@@ -1,9 +1,8 @@
 plugins {
-    id 'java-library'
-    id 'io.freefair.lombok' version "${lombokPluginVersion}"
+    id("java")
+    id("java-library")
+    id("io.freefair.lombok") version "${lombokPluginVersion}"
 }
-
-apply plugin: 'java'
 
 java {
     toolchain {
@@ -54,18 +53,11 @@ configurations {
     }
 }
 
-sourceSets {
-    test {
-        resources {
-            srcDirs += [ "$rootDir/cspr-standard-tests-resources" ]
-        }
-    }
-}
 
-task cucumberCli() {
+tasks.register('cucumberCli') {
     dependsOn assemble, testClasses
     doLast {
-            javaexec {
+        javaexec {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
             args = [
@@ -73,9 +65,9 @@ task cucumberCli() {
                     '--plugin', 'html:reports/cucumber-report.html',
                     '--plugin', 'junit:reports/cucumber-report.xml',
                     '--plugin', 'json:reports/cucumber-report.json',
-                    '--glue', 'com.stormeye.evaluation',
+                    '--glue', 'com.stormeye.steps',
                     '--glue', 'com.casper.sdk',
-                    'cspr-standard-tests-resources/features']
+                    'src/test/resources/features']
         }
     }
 }
