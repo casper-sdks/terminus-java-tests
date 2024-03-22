@@ -16,7 +16,8 @@ repositories {
 
 dependencies {
 
-    implementation "network.casper:casper-java-sdk:${casperSdkVersion}"
+    implementation fileTree(dir: 'lib', include: '*.jar')
+    // implementation "network.casper:casper-java-sdk:${casperSdkVersion}"
     implementation "dev.oak3:sbs4j:${sbs4jVersion}"
     implementation "io.github.oak:jsonrpc4j:${jsonrpc4jVersion}"
     implementation "com.syntifi.crypto:crypto-key-common:${cryptokeyVersion}"
@@ -54,25 +55,30 @@ configurations {
 }
 
 
-tasks.register('cucumberCli') {
-    dependsOn assemble, testClasses
-    doLast {
-        javaexec {
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = [
-                    '--plugin', 'pretty',
-                    '--plugin', 'html:reports/cucumber-report.html',
-                    '--plugin', 'junit:reports/cucumber-report.xml',
-                    '--plugin', 'json:reports/cucumber-report.json',
-                    '--glue', 'com.stormeye.steps',
-                    '--glue', 'com.casper.sdk',
-                    'src/test/resources/features']
-        }
+task cucumberCli(type: JavaExec) {
+    ext.cucmmber_name = System.getProperty('cucumber.name')
+    if (ext.cucmmber_name == null) {
+        ext.cucmmber_name = ''
     }
+    println 'ext.cucmmber_name=' + ext.cucmmber_name;
+
+    //  dependsOn assemble, testClasses
+    main = "io.cucumber.core.cli.Main"
+    classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+    args = [
+            // '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+            '--plugin', 'pretty',
+            '--plugin', 'html:reports/cucumber-report.html',
+            '--plugin', 'junit:reports/cucumber-report.xml',
+            '--plugin', 'json:reports/cucumber-report.json',
+            '--glue', 'com.stormeye.steps',
+            '--glue', 'com.casper.sdk',
+            '--name', ext.cucmmber_name,
+            'src/test/resources/features']
 }
 
 test {
+
     useJUnitPlatform()
     finalizedBy cucumberCli
 }
