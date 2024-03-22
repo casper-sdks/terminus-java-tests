@@ -16,6 +16,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ExpiringMatcher<T> extends CustomMatcher<T> {
 
+    public static abstract class PreCheckMatcher<T> extends CustomMatcher<T> {
+
+        public PreCheckMatcher(final String description) {
+            super(description);
+        }
+
+        public abstract boolean hasMatch();
+
+        public abstract T getMatch();
+
+    }
+
     private final Logger logger = LoggerFactory.getLogger(ExpiringMatcher.class);
 
     /** The matcher to use against the result */
@@ -55,6 +67,15 @@ public class ExpiringMatcher<T> extends CustomMatcher<T> {
 
     public boolean waitForMatch(final long timeoutSeconds) throws Exception {
 
+        if (delegate instanceof PreCheckMatcher) {
+            //noinspection rawtypes
+            PreCheckMatcher preCheckMatcher = (PreCheckMatcher) delegate;
+            if (preCheckMatcher.hasMatch()) {
+                preCheckMatcher.matches(preCheckMatcher.getMatch());
+                return true;
+            }
+        }
+
         //noinspection ResultOfMethodCallIgnored
         semaphore.tryAcquire(timeoutSeconds, TimeUnit.SECONDS);
 
@@ -88,4 +109,6 @@ public class ExpiringMatcher<T> extends CustomMatcher<T> {
 
         return passed;
     }
+
+
 }

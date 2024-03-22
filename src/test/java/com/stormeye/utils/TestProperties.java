@@ -20,7 +20,6 @@ public class TestProperties {
     private final int spxPort;
 
     public TestProperties() {
-
         this.hostname = getProperty("cspr.hostname", "localhost");
         this.dockerName = getProperty("cspr.docker.name", "cspr-cctl");
         this.rcpPort = getIntProperty("cspr.port.rcp", 11101);
@@ -31,14 +30,12 @@ public class TestProperties {
     }
 
     private String getProperty(final String name, final String defaultValue) {
-        final String property = System.getProperty(name);
+        final String property = System.getProperty(name, defaultValue);
         logger.info("{} = {}", name, property);
-        return property != null ? property : defaultValue;
+        return property;
     }
 
     private int getIntProperty(final String name, final int defaultValue) {
-        final String property = getProperty(name, null);
-        logger.info("{} = {}", name, property);
-        return property != null ? Integer.parseInt(property) : defaultValue;
+        return Integer.parseInt(getProperty(name, Integer.toString(defaultValue)));
     }
 }

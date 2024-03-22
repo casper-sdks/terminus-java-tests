@@ -60,10 +60,10 @@ task cucumberCli(type: JavaExec) {
     if (ext.cucmmber_name == null) {
         ext.cucmmber_name = ''
     }
-    println 'ext.cucmmber_name=' + ext.cucmmber_name;
+    println 'ext.cucmmber_name=' + ext.cucmmber_name
 
     //  dependsOn assemble, testClasses
-    main = "io.cucumber.core.cli.Main"
+    mainClass = "io.cucumber.core.cli.Main"
     classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
     args = [
             // '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
