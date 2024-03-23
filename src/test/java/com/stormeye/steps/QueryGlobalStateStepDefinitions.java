@@ -1,9 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.event.EventHandler;
-import com.stormeye.matcher.BlockAddedMatchers;
-import com.stormeye.matcher.ExpiringMatcher;
-import com.stormeye.utils.*;
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
@@ -24,9 +20,12 @@ import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueDeployInfo;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.event.EventHandler;
+import com.stormeye.matcher.BlockAddedMatchers;
+import com.stormeye.matcher.ExpiringMatcher;
+import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
-import io.cucumber.java.After;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -57,26 +56,47 @@ public class QueryGlobalStateStepDefinitions {
     private final ContextMap contextMap = ContextMap.getInstance();
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
     private final Logger logger = LoggerFactory.getLogger(QueryGlobalStateStepDefinitions.class);
-    private static final EventHandler eventHandler = new EventHandler(EventTarget.POJO);
     private final Node node = new Node(new TestProperties().getDockerName());
     private final TestProperties testProperties = new TestProperties();
-    @After
-    public static void after() {
-        eventHandler.close();
-    }
 
     @Given("that a valid block hash is known")
     public void thatAValidBlockHashIsKnown() throws Exception {
 
-        // Create a transfer
-        createTransfer();
+        final EventHandler eventHandler = new EventHandler(EventTarget.POJO);
 
-        // Wait for a block to be added for the transfer
-        waitForBlockAdded();
+        try {
 
-        logger.info("Given that a valid block hash is known");
+            // Listen for a block added event
+            //noinspection unchecked
+            @SuppressWarnings("rawtypes")
+            final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
 
-        assertThat(contextMap.get(StepConstants.LAST_BLOCK_ADDED), is(notNullValue()));
+                    EventType.MAIN,
+                    BlockAddedMatchers.hasTransferHashWithin(() -> {
+                                final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
+                                if (deployResult != null) {
+                                    logger.info("Deploy result hash: {}", deployResult.getDeployHash());
+                                    return deployResult.getDeployHash();
+                                }
+                                return null;
+                            },
+                            blockAddedEvent -> contextMap.put(StepConstants.LAST_BLOCK_ADDED, blockAddedEvent.getData())
+                    )
+            );
+
+            // Create a transfer
+            createTransfer();
+
+            // Wait for a block to be added for the transfer
+            waitForBlockAdded(matcher);
+
+
+            logger.info("Given that a valid block hash is known");
+
+            assertThat(contextMap.get(StepConstants.LAST_BLOCK_ADDED), is(notNullValue()));
+        } finally {
+            eventHandler.close();
+        }
     }
 
 
@@ -243,29 +263,20 @@ public class QueryGlobalStateStepDefinitions {
         contextMap.put(StepConstants.PUT_DEPLOY, deploy);
 
         contextMap.put(StepConstants.DEPLOY_RESULT, casperService.putDeploy(deploy));
+
+        logger.info("createdTransfer with deploy hash {}", deploy.getHash().toString());
     }
 
-    void waitForBlockAdded() throws Exception {
+    void waitForBlockAdded(final ExpiringMatcher<Event<BlockAdded>> matcher) throws Exception {
 
         logger.info("waitForBlockAdded");
 
-        final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
-
-        final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher<Event<BlockAdded>>) eventHandler.addEventMatcher(
-                EventType.MAIN,
-                BlockAddedMatchers.hasTransferHashWithin(
-                        deployResult.getDeployHash(),
-                        blockAddedEvent -> contextMap.put(StepConstants.LAST_BLOCK_ADDED, blockAddedEvent.getData())
-                )
-        );
-
         assertThat(matcher.waitForMatch(400), is(true));
-
-        eventHandler.removeEventMatcher(EventType.MAIN, matcher);
 
         final Digest matchingBlockHash = ((BlockAdded) contextMap.get(StepConstants.LAST_BLOCK_ADDED)).getBlockHash();
         assertThat(matchingBlockHash, is(notNullValue()));
 
+        final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
         final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
         assertThat(block, is(notNullValue()));
         final List<String> transferHashes = block.getBlock().getBody().getTransferHashes();
