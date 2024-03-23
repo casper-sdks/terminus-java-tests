@@ -197,6 +197,7 @@ public class BlockStepDefinitions {
         if (latestBlockNode.get("body").get("transfer_hashes").size() == 0) {
             assertThat(latestBlockSdk.getBlock().getBody().getTransferHashes(), is(empty()));
         } else {
+            latestBlockSdk.getBlock().getBody().getTransferHashes();
             latestBlockNode.get("body").findValues("transfer_hashes").forEach(
                     t -> assertThat(latestBlockSdk.getBlock().getBody().getTransferHashes(), hasItem(t.get(0).asText()))
             );

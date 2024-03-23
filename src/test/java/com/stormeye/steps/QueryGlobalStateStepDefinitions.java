@@ -56,7 +56,6 @@ public class QueryGlobalStateStepDefinitions {
     private final ContextMap contextMap = ContextMap.getInstance();
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
     private final Logger logger = LoggerFactory.getLogger(QueryGlobalStateStepDefinitions.class);
-
     private final Node node = new Node(new TestProperties().getDockerName());
     private final TestProperties testProperties = new TestProperties();
 
@@ -69,7 +68,8 @@ public class QueryGlobalStateStepDefinitions {
 
             // Listen for a block added event
             //noinspection unchecked
-            @SuppressWarnings("rawtypes") final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
+            @SuppressWarnings("rawtypes")
+            final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
 
                     EventType.MAIN,
                     BlockAddedMatchers.hasTransferHashWithin(() -> {
@@ -271,18 +271,7 @@ public class QueryGlobalStateStepDefinitions {
 
         logger.info("waitForBlockAdded");
 
-        /*final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
-
-        final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher<Event<BlockAdded>>) eventHandler.addEventMatcher(
-                EventType.MAIN,
-                BlockAddedMatchers.hasTransferHashWithin(
-                        deployResult.getDeployHash(),
-                        blockAddedEvent -> contextMap.put(StepConstants.LAST_BLOCK_ADDED, blockAddedEvent.getData())
-                )
-        );*/
-
         assertThat(matcher.waitForMatch(400), is(true));
-
 
         final Digest matchingBlockHash = ((BlockAdded) contextMap.get(StepConstants.LAST_BLOCK_ADDED)).getBlockHash();
         assertThat(matchingBlockHash, is(notNullValue()));

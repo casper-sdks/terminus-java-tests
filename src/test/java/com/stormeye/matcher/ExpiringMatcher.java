@@ -25,7 +25,6 @@ public class ExpiringMatcher<T> extends CustomMatcher<T> {
         public abstract boolean hasMatch();
 
         public abstract T getMatch();
-
     }
 
     private final Logger logger = LoggerFactory.getLogger(ExpiringMatcher.class);
@@ -58,11 +57,6 @@ public class ExpiringMatcher<T> extends CustomMatcher<T> {
                 throw new RuntimeException(e);
             }
         } while (counter.get() == 0);
-    }
-
-
-    public void match(final Object actual) {
-        matches(actual);
     }
 
     public boolean waitForMatch(final long timeoutSeconds) throws Exception {
@@ -109,6 +103,4 @@ public class ExpiringMatcher<T> extends CustomMatcher<T> {
 
         return passed;
     }
-
-
 }
