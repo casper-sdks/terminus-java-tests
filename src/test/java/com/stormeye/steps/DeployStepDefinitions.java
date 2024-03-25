@@ -1,11 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.event.EventHandler;
-import com.stormeye.matcher.DeployMatchers;
-import com.stormeye.matcher.ExpiringMatcher;
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.block.JsonBlockData;
@@ -23,6 +17,12 @@ import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.event.deployaccepted.DeployAccepted;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.event.EventHandler;
+import com.stormeye.matcher.DeployMatchers;
+import com.stormeye.matcher.ExpiringMatcher;
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
@@ -160,10 +160,11 @@ public class DeployStepDefinitions {
 
         final DeployResult deployResult = contextMap.get(DEPLOY_RESULT);
 
-        final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher<Event<BlockAdded>>) eventHandler.addEventMatcher(
+        //noinspection unchecked,rawtypes
+        final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
                 EventType.MAIN,
                 hasTransferHashWithin(
-                        deployResult.getDeployHash(),
+                        deployResult::getDeployHash,
                         blockAddedEvent -> contextMap.put(LAST_BLOCK_ADDED, blockAddedEvent.getData())
                 )
         );
