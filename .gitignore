@@ -20,5 +20,5 @@ gradle-app.setting
 /reports/
 # ignore the features folder and associated resouces as they are symlinked from the git sub-project
 /src/test/resources/features
-/src/test/resources/json/
-/src/test/resources/contracts/
+/src/test/resources/json
+/src/test/resources/contracts
