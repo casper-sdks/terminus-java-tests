@@ -1,0 +1,44 @@
+function _build() {
+
+  echo -e "Running build\n"
+
+  shift
+  while getopts "b:n:" option; do
+     case $option in
+        b)
+          BRANCH=$OPTARG;;
+        n)
+          NODE=$OPTARG;;
+       \?)
+           echo "Error: Invalid option"
+           exit;;
+     esac
+  done
+
+  if ! [ -x "$(command -v java)" ]; then
+    echo 'Error: java is not installed.' >&2
+    exit 1
+  fi
+
+  echo "[  Cloning required SDK branch  ]"
+  cd "$BASEDIR" || exit
+  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"
+
+  echo "[  Creating SDK gradle settings file  ]"
+  cd casper-java-sdk || exit
+  echo "rootProject.name = 'casper-java-sdk'" > settings.gradle
+
+  echo "[  Building SDK jar file  ]"
+  ./gradlew clean build -x test -x javaDoc > /dev/null 2>&1
+
+  echo -e "[  Editing terminus project to use the new SDK jar  ]\n"
+  cd "$BASEDIR" || exit
+  sed -i -e 's#implementation "network.casper:casper-java-sdk:${casperSdkVersion}"#//implementation "network.casper:casper-java-sdk:${casperSdkVersion}"#g' build.gradle
+  awk '/dependencies/{print $0 "\012implementation fileTree(dir:\042casper-java-sdk/build/libs\042, include: \042*.jar\042)";next}1' build.gradle >> build.gradle.temp &&
+    mv build.gradle.temp build.gradle
+
+  echo -e "Finished build\n"
+
+  exit 0
+
+}
