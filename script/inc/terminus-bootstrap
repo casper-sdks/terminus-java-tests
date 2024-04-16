@@ -1,0 +1,34 @@
+function _bootstrap() {
+
+  echo -e "Running bootstrap\n"
+
+  echo "[  Installing features from git@github.com:casper-sdks/terminus-test-resources.git  ]"
+
+  if [ -d "$BASEDIR/terminus-test-resources/features" ]
+  then
+      echo "[  Updating terminus-test-resources submodules  ]"
+      git submodule update --init --recursive
+      git submodule update --remote
+  else
+      echo "[  Cloning terminus-test-resources as submodule  ]"
+      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git "$BASEDIR"/terminus-test-resources 2> /dev/null
+  fi
+
+
+  if [ -d "$BASEDIR/src/test/resources/features" ]
+  then
+    echo "[  Removing any existing resources  ]"
+    rm "$BASEDIR"/src/test/resources/features
+    rm "$BASEDIR"/src/test/resources/contracts
+    rm "$BASEDIR"/src/test/resources/json
+  fi
+
+  echo -e "[  Copying updated test resources  ]\n"
+
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/features")" "$BASEDIR"/src/test/resources/features
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/contracts")" "$BASEDIR"/src/test/resources/contracts
+  ln -s "$(realpath "$BASEDIR/terminus-test-resources/json")" "$BASEDIR"/src/test/resources/json
+
+  echo -e "Finished bootstrap\n"
+
+}
