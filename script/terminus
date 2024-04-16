@@ -53,6 +53,11 @@ do
         list)
            _list
            ;;
+        action)
+           _bootstrap
+           _assets
+           _build "$@"
+           ;;
         *)
           echo 'Unrecognised command. Options are help, node, assets, init and test'
           _help;;
