@@ -23,7 +23,7 @@ function _build() {
   echo "[  Cloning required SDK branch  ]"
   cd "$BASEDIR" || exit
 #  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"  > /dev/null 2>&1
-  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"
+  git clone git@github.com:casper-sdks/terminus-java-tests.git -b "$BRANCH"
 
   echo "[  Creating SDK gradle settings file  ]"
   cd casper-java-sdk || exit
