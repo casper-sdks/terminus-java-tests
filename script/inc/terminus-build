@@ -22,7 +22,7 @@ function _build() {
 
   echo "[  Cloning required SDK branch  ]"
   cd "$BASEDIR" || exit
-  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"
+  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"  > /dev/null 2>&1
 
   echo "[  Creating SDK gradle settings file  ]"
   cd casper-java-sdk || exit
@@ -33,7 +33,9 @@ function _build() {
 
   echo -e "[  Editing terminus project to use the new SDK jar  ]\n"
   cd "$BASEDIR" || exit
+  #Comment out the Maven SDK dependency in the root gradle file
   sed -i -e 's#implementation "network.casper:casper-java-sdk:${casperSdkVersion}"#//implementation "network.casper:casper-java-sdk:${casperSdkVersion}"#g' build.gradle
+  #Add the locally built SDK jar to the root gradle dependencies (uses the octal value of double quotes)
   awk '/dependencies/{print $0 "\012implementation fileTree(dir:\042casper-java-sdk/build/libs\042, include: \042*.jar\042)";next}1' build.gradle >> build.gradle.temp &&
     mv build.gradle.temp build.gradle
 

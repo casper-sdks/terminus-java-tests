@@ -16,7 +16,6 @@ repositories {
 
 dependencies {
 
-    // implementation fileTree(dir: 'lib', include: '*.jar')
     implementation "network.casper:casper-java-sdk:${casperSdkVersion}"
     implementation "dev.oak3:sbs4j:${sbs4jVersion}"
     implementation "io.github.oak:jsonrpc4j:${jsonrpc4jVersion}"
@@ -62,7 +61,7 @@ task cucumberCli(type: JavaExec) {
     }
     println 'ext.cucumber_name=' + ext.cucumber_name
 
-    ext.cucmber_feature = System.getProperty('cucumber.feature')
+    ext.cucumber_feature = System.getProperty('cucumber.feature')
     if (ext.cucumber_feature == null) {
         ext.cucumber_feature = ''
     }
