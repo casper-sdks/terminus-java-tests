@@ -22,14 +22,16 @@ function _build() {
 
   echo "[  Cloning required SDK branch  ]"
   cd "$BASEDIR" || exit
-  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"  > /dev/null 2>&1
+#  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"  > /dev/null 2>&1
+  git clone https://github.com/casper-network/casper-java-sdk -b "$BRANCH"
 
   echo "[  Creating SDK gradle settings file  ]"
   cd casper-java-sdk || exit
   echo "rootProject.name = 'casper-java-sdk'" > settings.gradle
 
   echo "[  Building SDK jar file  ]"
-  ./gradlew clean build -x test -x javaDoc > /dev/null 2>&1
+#  ./gradlew clean build -x test -x javaDoc > /dev/null 2>&1
+  ./gradlew clean build -x test -x javaDoc
 
   echo -e "[  Editing terminus project to use the new SDK jar  ]\n"
   cd "$BASEDIR" || exit
