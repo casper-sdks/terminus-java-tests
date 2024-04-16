@@ -50,9 +50,7 @@ Points to note are:
   # example
   ./terminus test -f deploys.feature
   ```
-
   
-
 - JUnit test results will be output to /reports
 
 ### How to run locally IDE
