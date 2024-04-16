@@ -4,7 +4,7 @@ function _bootstrap() {
 
   echo "[  Installing features from git@github.com:casper-sdks/terminus-test-resources.git  ]"
 
-  if [ -d "$BASEDIR/terminus-test-resources/features" ]
+  if [ -d "$BASEDIR/terminus-test-resources/features" ] || [ $1 == "action" ]
   then
       echo "[  Updating terminus-test-resources submodules  ]"
       git submodule update --init --recursive
