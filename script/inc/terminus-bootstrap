@@ -4,17 +4,19 @@ function _bootstrap() {
 
   echo "[  Installing features from git@github.com:casper-sdks/terminus-test-resources.git  ]"
 
-  if [ -d "$BASEDIR/terminus-test-resources" ]
+  if [ "$1" != "action" ]
   then
-      echo "[  Updating terminus-test-resources submodules  ]"
-      git submodule update --init --recursive
-      git submodule update --remote
-  else
-      echo "[  Cloning terminus-test-resources as submodule  ]"
-#      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git "$BASEDIR"/terminus-test-resources 2> /dev/null
-      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git "$BASEDIR"/terminus-test-resources
+    if [ -d "$BASEDIR/terminus-test-resources" ]
+    then
+        echo "[  Updating terminus-test-resources submodules  ]"
+        git submodule update --init --recursive
+        git submodule update --remote
+    else
+        echo "[  Cloning terminus-test-resources as submodule  ]"
+  #      git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git "$BASEDIR"/terminus-test-resources 2> /dev/null
+        git submodule add -f git@github.com:casper-sdks/terminus-test-resources.git "$BASEDIR"/terminus-test-resources
+    fi
   fi
-
 
   if [ -d "$BASEDIR/src/test/resources/features" ]
   then
