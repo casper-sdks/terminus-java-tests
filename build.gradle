@@ -66,7 +66,7 @@ task cucumberCli(type: JavaExec) {
     if (ext.cucumber_feature == null) {
         ext.cucumber_feature = ''
     }
-    println 'ext.cucmber_feature=' + ext.cucumber_feature
+    println 'ext.cucumber_feature=' + ext.cucumber_feature
 
     //  dependsOn assemble, testClasses
     mainClass = "io.cucumber.core.cli.Main"
