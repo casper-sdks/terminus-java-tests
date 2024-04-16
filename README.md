@@ -31,16 +31,16 @@ Points to note are:
   ./terminus help
   ```
 
-- To run the test features:
-
-  ```bash
-  ./terminus test
-  ```
-
 - To list the available test features:
 
 - ```bash
   ./terminus list
+  ```
+
+- To run the test features:
+
+- ```bash
+  ./terminus test
   ```
 
 - To run an individual test feature:
