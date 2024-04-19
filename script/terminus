@@ -54,7 +54,7 @@ do
            _list
            ;;
         action)
-           _bootstrap
+           _bootstrap "action"
            _assets
            _build "$@"
            ;;
