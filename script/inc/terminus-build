@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 function _build() {
 
   echo -e "Running build\n"
@@ -42,5 +43,4 @@ function _build() {
   echo -e "Finished build\n"
 
   exit 0
-
 }

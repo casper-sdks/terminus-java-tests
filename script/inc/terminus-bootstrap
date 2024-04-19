@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 function _bootstrap() {
 
   echo -e "Running bootstrap\n"
@@ -30,5 +31,4 @@ function _bootstrap() {
   ln -s "$(realpath "$BASEDIR/terminus-test-resources/json")" "$BASEDIR"/src/test/resources/json
 
   echo -e "Finished bootstrap\n"
-
 }

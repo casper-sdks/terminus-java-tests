@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 function _test() {
 
@@ -36,15 +37,14 @@ function _test() {
   echo -e "[  Tests finished  ]\n"
 
   exit 0
-
 }
 
 function _list() {
 
-    echo -e "[  Available features  ]\n"
+    echo -e "\n\n[  Available features  ]"
+    echo -e "[  ------------------  ]"
     FILES=$(find "$BASEDIR""$FEATURES_PATH" -name "*.feature")
     for FILE in $FILES; do
       echo "["  "${FILE##*/}"  "]"
     done;
-
 }
