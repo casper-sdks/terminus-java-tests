@@ -1,9 +1,7 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.casper.sdk.model.clvalue.AbstractCLValue;
+import com.casper.sdk.model.clvalue.CLValueOption;
 import com.casper.sdk.model.clvalue.CLValueU512;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
@@ -11,6 +9,9 @@ import com.casper.sdk.model.deploy.NamedArg;
 import com.casper.sdk.model.deploy.executabledeploy.Transfer;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.encdec.Hex;
 import dev.oak3.sbs4j.exception.ValueSerializationException;
 import io.cucumber.java.en.And;
@@ -167,7 +168,11 @@ public class ReadDeployStepDefinitions {
     public void theSessionTypeIs(final String parameterName, final String typeName) {
         final NamedArg<?> amount = getNamedArg(getDeploy().getSession().getArgs(), parameterName);
         final AbstractCLValue<?, ?> clValue = amount.getClValue();
-        assertThat(clValue.getClType().getTypeName(), is(typeName));
+        if (clValue instanceof CLValueOption) {
+            assertThat(((CLValueOption)clValue).getValue().orElseThrow().getClType().getTypeName(), is(typeName));
+        } else {
+            assertThat(clValue.getClType().getTypeName(), is(typeName));
+        }
     }
 
     @And("the session {string} is {string}")
@@ -176,6 +181,8 @@ public class ReadDeployStepDefinitions {
         final AbstractCLValue<?, ?> clValue = amount.getClValue();
         if (clValue.getValue() instanceof byte[]) {
             assertThat(clValue.getValue(), is(Hex.decode(value)));
+        } else if (clValue instanceof CLValueOption) {
+            assertThat(((CLValueOption)clValue).getValue().orElseThrow().getValue().toString(), is(value));
         } else {
             assertThat(clValue.getValue().toString(), is(value));
         }

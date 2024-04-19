@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+function _test() {
+
+  FEATURES_PATH=/src/test/resources/features/
+
+  shift
+  while getopts "f:" option; do
+     case $option in
+        f)
+          FEATURE=$OPTARG;;
+       \?)
+         _list
+         exit;;
+     esac
+  done
+
+  cd "$BASEDIR" || exit
+
+  if ! [ -z "$FEATURE" ]; then
+    if ! [ -f "$BASEDIR""$FEATURES_PATH""$FEATURE" ]; then
+      echo -e "[  Feature $FEATURE does not exist  ]\n"
+      _list
+      exit 1
+    fi
+  fi
+
+  if [ -z "${FEATURE}" ]
+  then
+        echo -e "[  Running tests against all features  ]\n"
+        ./gradlew test
+  else
+        echo -e "[  Running tests against $FEATURE feature  ]\n"
+        ./gradlew test -Dcucumber.feature="$FEATURE"
+  fi
+
+  echo -e "[  Tests finished  ]\n"
+
+  exit 0
+}
+
+function _list() {
+
+    echo -e "\n\n[  Available features  ]"
+    echo -e "[  ------------------  ]"
+    FILES=$(find "$BASEDIR""$FEATURES_PATH" -name "*.feature")
+    for FILE in $FILES; do
+      echo "["  "${FILE##*/}"  "]"
+    done;
+}

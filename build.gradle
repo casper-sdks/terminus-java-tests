@@ -56,11 +56,17 @@ configurations {
 
 
 task cucumberCli(type: JavaExec) {
-    ext.cucmmber_name = System.getProperty('cucumber.name')
-    if (ext.cucmmber_name == null) {
-        ext.cucmmber_name = ''
+    ext.cucumber_name = System.getProperty('cucumber.name')
+    if (ext.cucumber_name == null) {
+        ext.cucumber_name = ''
     }
-    println 'ext.cucmmber_name=' + ext.cucmmber_name
+    println 'ext.cucumber_name=' + ext.cucumber_name
+
+    ext.cucumber_feature = System.getProperty('cucumber.feature')
+    if (ext.cucumber_feature == null) {
+        ext.cucumber_feature = ''
+    }
+    println 'ext.cucumber_feature=' + ext.cucumber_feature
 
     //  dependsOn assemble, testClasses
     mainClass = "io.cucumber.core.cli.Main"
@@ -73,8 +79,9 @@ task cucumberCli(type: JavaExec) {
             '--plugin', 'json:reports/cucumber-report.json',
             '--glue', 'com.stormeye.steps',
             '--glue', 'com.casper.sdk',
-            '--name', ext.cucmmber_name,
-            'src/test/resources/features']
+            '--name', ext.cucumber_name,
+            "src/test/resources/features/${ext.cucumber_feature}"
+    ]
 }
 
 test {

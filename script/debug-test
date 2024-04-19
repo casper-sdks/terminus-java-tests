@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# remote debugs one or more cucumber e2e tests, the 1st parameter is the cucumber name regex eg:
-# ./script/debug-test query_global_state
-# The above example will start the JVM in debug mode and only execute the info_get_peers scenario.
-cd "$(dirname "$0")/.."|| exit 1
-./gradlew --stop
-./gradlew cucumber -Dorg.gradle.jvmargs='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005' -Dcucumber.name="${1}" --no-daemon --debug-jvm
