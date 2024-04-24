@@ -424,22 +424,25 @@ public class WasmStepDefinitions {
         if (obtainVersionUref) {
             assertThat(this.contextMap.get("versionUref"), is(notNullValue()));
         }
+
+       // this.casperService.queryGlobalState()
     }
 
     @And("the version uref's dictionary item value is {long}")
     public void theVersionUrefSDictionaryItemValueIs(final long version) throws Exception {
 
-        final URef versionUref = URef.fromString(contextMap.get("versionUref"));
-        final String stateRootHash = this.contextMap.get("stateRootHash");
+        final String stateRootHash = this.casperService.getStateRootHash().getStateRootHash();
+        final Ed25519PrivateKey privateKey = this.contextMap.get("faucetPrivateKey");
+        final PublicKey publicKey = PublicKey.fromAbstractPublicKey(privateKey.derivePublicKey());
+        final String accountHash = publicKey.generateAccountHash(true);
+        final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
 
-        final URefDictionaryIdentifier dictionaryIdentifier = URefDictionaryIdentifier.builder()
-                .uref(URefSeed.builder().dictionaryItemKey("version").uref(versionUref).build())
-                .build();
+        final StoredValueData stateItem = this.casperService.getStateItem(
+                stateRootHash,
+                key.getDictionary(),
+                Arrays.asList("version"));
 
-        final DictionaryData dictionaryData = this.casperService.getStateDictionaryItem(stateRootHash, dictionaryIdentifier);
-
-        assertThat(dictionaryData, is(notNullValue()));
+        assertThat(stateItem, is(notNullValue()));
+        assertThat(((CLValueU32)stateItem.getStoredValue().getValue()).getValue(), is(Long.valueOf(version)));
     }
-
-
 }
