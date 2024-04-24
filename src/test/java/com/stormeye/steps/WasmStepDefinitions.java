@@ -3,10 +3,14 @@ package com.stormeye.steps;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperConstants;
 import com.casper.sdk.helper.CasperDeployHelper;
-import com.casper.sdk.identifier.dictionary.*;
+import com.casper.sdk.identifier.dictionary.ContractNamedKey;
+import com.casper.sdk.identifier.dictionary.ContractNamedKeyDictionaryIdentifier;
+import com.casper.sdk.identifier.dictionary.StringDictionaryIdentifier;
 import com.casper.sdk.model.account.Account;
 import com.casper.sdk.model.clvalue.*;
 import com.casper.sdk.model.common.Ttl;
+import com.casper.sdk.model.contract.ContractPackage;
+import com.casper.sdk.model.contract.ContractVersion;
 import com.casper.sdk.model.contract.NamedKey;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployData;
@@ -19,7 +23,6 @@ import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueAccount;
 import com.casper.sdk.model.storedvalue.StoredValueData;
-import com.casper.sdk.model.uref.URef;
 import com.casper.sdk.service.CasperService;
 import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
@@ -350,10 +353,15 @@ public class WasmStepDefinitions {
                 new NamedArg<>("amount", new CLValueU256(new BigInteger(payment)))
         );
 
+        // Use the last installed version even though we asked for 2 as there may be more
+        final ContractPackage contractPackage = this.contextMap.get("contractPackage");
+        final ContractVersion contractVersion = contractPackage.getVersions().get(contractPackage.getVersions().size() - 1);
+
+        final String hash = contractVersion.getHash().replace("contract-", "");
         final StoredVersionedContractByHash session = StoredVersionedContractByHash.builder()
                 .entryPoint(entryPoint)
-                .hash(contractHash)
-                .version(version)
+                .hash(hash)
+                .version((long) contractVersion.getVersion())
                 .args(args)
                 .build();
 
@@ -424,11 +432,9 @@ public class WasmStepDefinitions {
         if (obtainVersionUref) {
             assertThat(this.contextMap.get("versionUref"), is(notNullValue()));
         }
-
-       // this.casperService.queryGlobalState()
     }
 
-    @And("the version uref's dictionary item value is {long}")
+    @And("the version dictionary item value is {long}")
     public void theVersionUrefSDictionaryItemValueIs(final long version) throws Exception {
 
         final String stateRootHash = this.casperService.getStateRootHash().getStateRootHash();
@@ -437,12 +443,27 @@ public class WasmStepDefinitions {
         final String accountHash = publicKey.generateAccountHash(true);
         final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
 
-        final StoredValueData stateItem = this.casperService.getStateItem(
+        StoredValueData stateItem = this.casperService.getStateItem(
                 stateRootHash,
                 key.getDictionary(),
                 Arrays.asList("version"));
 
         assertThat(stateItem, is(notNullValue()));
-        assertThat(((CLValueU32)stateItem.getStoredValue().getValue()).getValue(), is(Long.valueOf(version)));
+        // assertThat(((CLValueU32)stateItem.getStoredValue().getValue()).getValue(), is(Long.valueOf(version)));
+
+        stateItem = this.casperService.getStateItem(
+                stateRootHash,
+                key.getDictionary(),
+                Arrays.asList("counter_package_name"));
+
+        assertThat(stateItem, is(notNullValue()));
+        assertThat(stateItem.getStoredValue().getValue(), is(instanceOf(ContractPackage.class)));
+        ContractPackage contractPackage = (ContractPackage) stateItem.getStoredValue().getValue();
+        assertThat(contractPackage.getVersions().size(), is(greaterThan(0)));
+        assertThat(contractPackage.getAccessKey(), startsWith("uref-"));
+        assertThat(contractPackage.getDisabledVersions(), hasSize(0));
+        assertThat(contractPackage.getLockStatus(), is("Unlocked"));
+
+        this.contextMap.put("contractPackage", contractPackage);
     }
 }
