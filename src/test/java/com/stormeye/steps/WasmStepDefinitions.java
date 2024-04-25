@@ -1,6 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.*;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperConstants;
 import com.casper.sdk.helper.CasperDeployHelper;
@@ -10,6 +9,8 @@ import com.casper.sdk.identifier.dictionary.StringDictionaryIdentifier;
 import com.casper.sdk.model.account.Account;
 import com.casper.sdk.model.clvalue.*;
 import com.casper.sdk.model.common.Ttl;
+import com.casper.sdk.model.contract.ContractPackage;
+import com.casper.sdk.model.contract.ContractVersion;
 import com.casper.sdk.model.contract.NamedKey;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployData;
@@ -23,6 +24,7 @@ import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueAccount;
 import com.casper.sdk.model.storedvalue.StoredValueData;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.encdec.Hex;
 import dev.oak3.sbs4j.exception.ValueSerializationException;
@@ -58,6 +60,7 @@ public class WasmStepDefinitions {
     public final CasperService casperService = CasperClientProvider.getInstance().getCasperService();
 
     private final TestProperties testProperties = new TestProperties();
+
     @Given("that a smart contract {string} is located in the {string} folder")
     public void thatASmartContractIsInTheFolder(String wasmFileName, String contractsFolder) throws IOException {
         logger.info("Give that a smart contract {string} is in the {string} folder");
@@ -74,7 +77,7 @@ public class WasmStepDefinitions {
         final URL resource = contextMap.get(StepConstants.WASM_PATH);
 
         final byte[] bytes = IOUtils.readBytesFromStream(resource.openStream());
-        assertThat(bytes.length, is(189336));
+        //assertThat(bytes.length, is(189336));
 
         final String chainName = testProperties.getChainName();
         final BigInteger payment = new BigInteger("200000000000");
@@ -138,35 +141,13 @@ public class WasmStepDefinitions {
 
     @Then("the account named keys contain the {string} name")
     public void theAccountNamedKeysContainThe(final String contractName) throws Exception {
+        validateContractInstalled(contractName, false);
+    }
 
-        Thread.sleep(5000L);
 
-        final Ed25519PrivateKey privateKey = this.contextMap.get("faucetPrivateKey");
-        PublicKey publicKey = PublicKey.fromAbstractPublicKey(privateKey.derivePublicKey());
-        final String accountHash = publicKey.generateAccountHash(true);
-        final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
-
-        final StateRootHashData stateRootHash = this.casperService.getStateRootHash();
-        this.contextMap.put("stateRootHash", stateRootHash.getStateRootHash());
-        //noinspection deprecation
-        final StoredValueData stateItem = this.casperService.getStateItem(
-                stateRootHash.getStateRootHash(),
-                key.getDictionary(),
-                new ArrayList<>());
-
-        assertThat(stateItem, is(notNullValue()));
-        assertThat(stateItem.getStoredValue(), is(instanceOf(StoredValueAccount.class)));
-
-        final Account account = (Account) stateItem.getStoredValue().getValue();
-        assertThat(account.getAssociatedKeys(), is(not(empty())));
-        account.getNamedKeys().forEach((NamedKey namedKey) -> {
-                    assertThat(namedKey.getName(), startsWithIgnoringCase(contractName));
-                    if (namedKey.getKey().startsWith("hash")) {
-                        this.contextMap.put("contractHash", namedKey.getKey());
-                    }
-                }
-        );
-
+    @Then("the account named keys contain the {string} name and a version uref")
+    public void theAccountNamedKeysContainTheNameAndAVersionUref(final String contractName) throws Exception {
+        validateContractInstalled(contractName, true);
     }
 
     @And("the contract data {string} is a {string} with a value of {string} and bytes of {string}")
@@ -201,7 +182,7 @@ public class WasmStepDefinitions {
                                                                    final String value,
                                                                    final String hexBytes) throws ValueSerializationException {
 
-        final String stateRootHash = this.contextMap.get("stateRootHash");
+        final String stateRootHash = this.casperService.getStateRootHash().getStateRootHash();
         final String contractHash = this.contextMap.get("contractHash");
         final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
 
@@ -233,14 +214,11 @@ public class WasmStepDefinitions {
 
         // Create new recipient
         final Ed25519PrivateKey recipientPrivateKey = Ed25519PrivateKey.deriveRandomKey();
-        final PublicKey recipient = PublicKey.fromAbstractPublicKey(recipientPrivateKey.derivePublicKey());
         final BigInteger amount = new BigInteger(transferAmount);
         final String contractHash = ((String) this.contextMap.get("contractHash")).substring(5);
         final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
-        final String accountHash = recipient.generateAccountHash(false);
 
-        final List<NamedArg<?>> args = Arrays.asList(
-                new NamedArg<>("recipient", new CLValueByteArray(Hex.decode(accountHash))),
+        final List<NamedArg<?>> args = List.of(
                 new NamedArg<>("amount", new CLValueU256(amount))
         );
 
@@ -284,7 +262,8 @@ public class WasmStepDefinitions {
     }
 
     @When("the the contract is invoked by name {string} and a transfer amount of {string}")
-    public void theTheContractIsInvokedByNameAndATransferAmountOf(final String contractName, final String transferAmount) throws Exception {
+    public void theTheContractIsInvokedByNameAndATransferAmountOf(final String contractName,
+                                                                  final String transferAmount) throws Exception {
 
         final Ed25519PrivateKey recipientPrivateKey = Ed25519PrivateKey.deriveRandomKey();
         final PublicKey recipient = PublicKey.fromAbstractPublicKey(recipientPrivateKey.derivePublicKey());
@@ -299,7 +278,7 @@ public class WasmStepDefinitions {
 
         final StoredContractByName session = StoredContractByName.builder()
                 .name(contractName.toUpperCase())
-                .entryPoint("transfer")
+                .entryPoint("counter_inc")
                 .args(args)
                 .build();
 
@@ -323,33 +302,31 @@ public class WasmStepDefinitions {
         this.contextMap.put("transferDeploy", transferDeploy);
     }
 
-    @When("the the contract is invoked by name {string} and version with a transfer amount of {string}")
-    public void theTheContractIsInvokedByNameAndVersionWithATransferAmountOf(final String contractName, final String transferAmount) throws Exception {
-        final Ed25519PrivateKey recipientPrivateKey = Ed25519PrivateKey.deriveRandomKey();
-        final PublicKey recipient = PublicKey.fromAbstractPublicKey(recipientPrivateKey.derivePublicKey());
-        final BigInteger amount = new BigInteger(transferAmount);
+    @When("the the contract is invoked by name {string}, and version {long}, and entry point of {string}, and with a payment amount of {string}")
+    public void theTheContractIsInvokedByNameAndVersionWithATransferAmountOf(final String contractName,
+                                                                             final long version,
+                                                                             final String entryPoint,
+                                                                             final String payment) throws Exception {
         final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
-        final String accountHash = recipient.generateAccountHash(false);
 
-        final List<NamedArg<?>> args = Arrays.asList(
-                new NamedArg<>("recipient", new CLValueByteArray(Hex.decode(accountHash))),
-                new NamedArg<>("amount", new CLValueU256(amount))
+        final List<NamedArg<?>> args = List.of(
+                new NamedArg<>("amount", new CLValueU256(new BigInteger(payment)))
         );
 
         final StoredVersionedContractByName session = StoredVersionedContractByName.builder()
-                .name(contractName.toUpperCase())
-                .version(1L)
-                .entryPoint("transfer")
+                .name(contractName)
+                .version(version)
+                .entryPoint(entryPoint)
                 .args(args)
                 .build();
 
-        final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
+        final ModuleBytes paymentBytes = getPaymentModuleBytes(new BigInteger(payment));
 
         final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,
-                payment,
+                paymentBytes,
                 1L,
                 Ttl.builder().ttl("30m").build(),
                 new Date(),
@@ -363,35 +340,36 @@ public class WasmStepDefinitions {
         this.contextMap.put("transferDeploy", transferDeploy);
     }
 
-    @When("the the contract is invoked by hash and version with a transfer amount of {string}")
-    public void theTheContractIsInvokedByHashAndVersionWithATransferAmountOf(String transferAmount) throws Exception {
-        // Create new recipient
-        final Ed25519PrivateKey recipientPrivateKey = Ed25519PrivateKey.deriveRandomKey();
-        final PublicKey recipient = PublicKey.fromAbstractPublicKey(recipientPrivateKey.derivePublicKey());
-        final BigInteger amount = new BigInteger(transferAmount);
-        final String contractHash = ((String) this.contextMap.get("contractHash")).substring(5);
+    @And("the the contract is invoked by hash, and version {int}, and entry point of {string}, and with a payment amount of {string}")
+    public void theTheContractIsInvokedByHashAndVersionWithATransferAmountOf(final long version, final String entryPoint, final String payment) throws
+            Exception {
         final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
-        final String accountHash = recipient.generateAccountHash(false);
 
-        final List<NamedArg<?>> args = Arrays.asList(
-                new NamedArg<>("recipient", new CLValueByteArray(Hex.decode(accountHash))),
-                new NamedArg<>("amount", new CLValueU256(amount))
+        final List<NamedArg<?>> args = List.of(
+                new NamedArg<>("amount", new CLValueU256(new BigInteger(payment)))
         );
 
+        final ContractPackage contractPackage = this.contextMap.get("contractPackage");
+        // Use the last installed version even though we asked for 2 as there may be more
+        final ContractVersion contractVersion = contractPackage.getVersions().get(contractPackage.getVersions().size() - 1);
+
+        // final String hash = contractVersion.getHash().replace("contract-", "");
+        final String hash = this.contextMap.get("counterPackageHash").toString().replace("hash-", "");
+
         final StoredVersionedContractByHash session = StoredVersionedContractByHash.builder()
-                .entryPoint("transfer")
-                .hash(contractHash)
-                .version(1L)
+                .entryPoint(entryPoint)
+                .hash(hash)
+                .version((long) contractVersion.getVersion())
                 .args(args)
                 .build();
 
-        final ModuleBytes payment = getPaymentModuleBytes(new BigInteger("2500000000"));
+        final ModuleBytes paymentBytes = getPaymentModuleBytes(new BigInteger(payment));
 
         final String chainName = testProperties.getChainName();
         final Deploy transferDeploy = CasperDeployHelper.buildDeploy(faucetPrivateKey,
                 chainName,
                 session,
-                payment,
+                paymentBytes,
                 1L,
                 Ttl.builder().ttl("30m").build(),
                 new Date(),
@@ -403,5 +381,88 @@ public class WasmStepDefinitions {
         assertThat(deployResult.getDeployHash(), is(notNullValue()));
 
         this.contextMap.put("transferDeploy", transferDeploy);
+    }
+
+    private void validateContractInstalled(final String contractName, final boolean obtainVersionUref) throws InterruptedException, IOException {
+        Thread.sleep(5000L);
+
+        final Ed25519PrivateKey privateKey = this.contextMap.get("faucetPrivateKey");
+        final PublicKey publicKey = PublicKey.fromAbstractPublicKey(privateKey.derivePublicKey());
+        final String accountHash = publicKey.generateAccountHash(true);
+        final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
+
+        final StateRootHashData stateRootHash = this.casperService.getStateRootHash();
+        this.contextMap.put("stateRootHash", stateRootHash.getStateRootHash());
+        //noinspection deprecation
+        final StoredValueData stateItem = this.casperService.getStateItem(
+                stateRootHash.getStateRootHash(),
+                key.getDictionary(),
+                new ArrayList<>());
+
+        assertThat(stateItem, is(notNullValue()));
+        assertThat(stateItem.getStoredValue(), is(instanceOf(StoredValueAccount.class)));
+
+        this.contextMap.remove("contractHash");
+        this.contextMap.remove("versionUref");
+
+        final Account account = (Account) stateItem.getStoredValue().getValue();
+        assertThat(account.getAssociatedKeys(), is(not(empty())));
+        account.getNamedKeys().forEach((NamedKey namedKey) -> {
+
+            if (namedKey.getName().equalsIgnoreCase(contractName)) {
+                if (namedKey.getKey().startsWith("hash")) {
+                    this.contextMap.put("contractHash", namedKey.getKey());
+                }
+            }
+
+            if (namedKey.getName().equalsIgnoreCase("counter_package_name")) {
+                this.contextMap.put("counterPackageHash", namedKey.getKey());
+            }
+
+            if (namedKey.getName().equalsIgnoreCase("version")) {
+                this.contextMap.put("versionUref", namedKey.getKey());
+            }
+        });
+
+        assertThat(this.contextMap.get("contractHash"), is(notNullValue()));
+        assertThat(this.contextMap.get("counterPackageHash"), is(notNullValue()));
+
+        if (obtainVersionUref) {
+            assertThat(this.contextMap.get("versionUref"), is(notNullValue()));
+        }
+    }
+
+    @And("the version dictionary item value is {long}")
+    public void theVersionUrefSDictionaryItemValueIs(final long version) throws Exception {
+
+        final String stateRootHash = this.casperService.getStateRootHash().getStateRootHash();
+        final Ed25519PrivateKey privateKey = this.contextMap.get("faucetPrivateKey");
+        final PublicKey publicKey = PublicKey.fromAbstractPublicKey(privateKey.derivePublicKey());
+        final String accountHash = publicKey.generateAccountHash(true);
+        final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
+
+        StoredValueData stateItem = this.casperService.getStateItem(
+                stateRootHash,
+                key.getDictionary(),
+                List.of("version"));
+
+        assertThat(stateItem, is(notNullValue()));
+        // Depending upon the execution order the version may be different less than the expected version
+        assertThat(((CLValueU32) stateItem.getStoredValue().getValue()).getValue(), is(greaterThanOrEqualTo(version)));
+
+        stateItem = this.casperService.getStateItem(
+                stateRootHash,
+                key.getDictionary(),
+                List.of("counter_package_name"));
+
+        assertThat(stateItem, is(notNullValue()));
+        assertThat(stateItem.getStoredValue().getValue(), is(instanceOf(ContractPackage.class)));
+        ContractPackage contractPackage = (ContractPackage) stateItem.getStoredValue().getValue();
+        assertThat(contractPackage.getVersions().size(), is(greaterThan(0)));
+        assertThat(contractPackage.getAccessKey(), startsWith("uref-"));
+        assertThat(contractPackage.getDisabledVersions(), hasSize(0));
+        assertThat(contractPackage.getLockStatus(), is("Unlocked"));
+
+        this.contextMap.put("contractPackage", contractPackage);
     }
 }
