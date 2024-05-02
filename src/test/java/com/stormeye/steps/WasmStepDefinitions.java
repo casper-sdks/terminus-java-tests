@@ -214,11 +214,14 @@ public class WasmStepDefinitions {
 
         // Create new recipient
         final Ed25519PrivateKey recipientPrivateKey = Ed25519PrivateKey.deriveRandomKey();
+        final PublicKey recipient = PublicKey.fromAbstractPublicKey(recipientPrivateKey.derivePublicKey());
         final BigInteger amount = new BigInteger(transferAmount);
         final String contractHash = ((String) this.contextMap.get("contractHash")).substring(5);
         final Ed25519PrivateKey faucetPrivateKey = this.contextMap.get("faucetPrivateKey");
+        final String accountHash = recipient.generateAccountHash(false);
 
-        final List<NamedArg<?>> args = List.of(
+        final List<NamedArg<?>> args = Arrays.asList(
+                new NamedArg<>("recipient", new CLValueByteArray(Hex.decode(accountHash))),
                 new NamedArg<>("amount", new CLValueU256(amount))
         );
 
@@ -278,7 +281,7 @@ public class WasmStepDefinitions {
 
         final StoredContractByName session = StoredContractByName.builder()
                 .name(contractName.toUpperCase())
-                .entryPoint("counter_inc")
+                .entryPoint("transfer")
                 .args(args)
                 .build();
 
@@ -425,9 +428,9 @@ public class WasmStepDefinitions {
         });
 
         assertThat(this.contextMap.get("contractHash"), is(notNullValue()));
-        assertThat(this.contextMap.get("counterPackageHash"), is(notNullValue()));
 
         if (obtainVersionUref) {
+            assertThat(this.contextMap.get("counterPackageHash"), is(notNullValue()));
             assertThat(this.contextMap.get("versionUref"), is(notNullValue()));
         }
     }
