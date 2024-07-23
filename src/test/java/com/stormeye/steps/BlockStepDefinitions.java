@@ -175,30 +175,33 @@ public class BlockStepDefinitions {
 
         logger.info("Then the body of the returned block is equal to the body of the returned test node block");
 
-        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
-        JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlock().getHash().toString());
+        final ChainGetBlockResult latestBlockSdk = contextMap.get("blockDataSdk");
+        JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlockWithSignatures().getBlock().getHash().toString());
         contextMap.put("blockDataNode", latestBlockSdk);
 
-        assertThat(latestBlockSdk.getBlock().getBody(), is(notNullValue()));
-        assertThat(latestBlockSdk.getBlock().getBody().getProposer().toString(), is(latestBlockNode.get("body").get("proposer").asText()));
+        assertThat(latestBlockSdk.getBlockWithSignatures().getBlock().getHeader(), is(instanceOf(BlockHeaderV2.class)));
+        assertThat(
+                ((BlockHeaderV2) latestBlockSdk.getBlockWithSignatures().getBlock().getHeader()).getProposer().toString(),
+                is(latestBlockNode.at("/block/Version2/header/proposer").asText())
+        );
 
-        assertThat(latestBlockSdk.getBlock().getBody(), is(instanceOf(BlockBodyV2.class)));
-        BlockBodyV2 body = (BlockBodyV2) latestBlockSdk.getBlock().getBody();//noinspection SizeReplaceableByIsEmpty
+        assertThat(latestBlockSdk.getBlockWithSignatures().getBlock().getBody(), is(instanceOf(BlockBodyV2.class)));
+        BlockBodyV2 body = (BlockBodyV2) latestBlockSdk.getBlockWithSignatures().getBlock().getBody();//noinspection SizeReplaceableByIsEmpty
 
-        if (latestBlockNode.get("body").get("deploy_hashes").size() == 0) {
+        if (latestBlockNode.at("/block/Version2/body/transactions").size() == 0) {
             assertThat(body.getTransactions().values(), is(empty()));
         } else {
-
+            // FIXME this won't work
             latestBlockNode.get("body").findValues("deploy_hashes").forEach(
                     d -> assertThat(body.getFlatTransactions(), hasItem(new Digest(d.textValue())))
             );
         }
         //noinspection SizeReplaceableByIsEmpty
-        if (latestBlockNode.get("body").get("transfer_hashes").size() == 0) {
+        if (latestBlockNode.at("/block/Version2/body/transfer_hashes").size() == 0) {
             assertThat(body.getTransferHashes(), is(empty()));
         } else {
-
-            latestBlockNode.get("body").findValues("transfer_hashes").forEach(
+            // FIXME this won't work
+            latestBlockNode.at("/block/Version2/body/transfer_hashes").forEach(
                     t -> assertThat(body.getTransferHashes(), hasItem(new Digest(t.get(0).asText())))
             );
         }
@@ -208,32 +211,33 @@ public class BlockStepDefinitions {
     public void theHashOfTheReturnedBlockIsEqualToTheHashOfTheReturnedTestNodeBlock() {
         logger.info("And the hash of the returned block is equal to the hash of the returned test node block");
 
-        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
-        final JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlock().getHash().toString());
+        final ChainGetBlockResult latestBlockSdk = contextMap.get("blockDataSdk");
+        final JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlockWithSignatures().getBlock().getHash().toString());
         contextMap.put("blockDataNode", latestBlockNode);
 
-        assertThat(latestBlockSdk.getBlock().getHash().toString(), is(latestBlockNode.get("hash").asText()));
+        assertThat(latestBlockSdk.getBlockWithSignatures().getBlock().getHash().toString(), is(latestBlockNode.at("/block/Version2/hash").asText()));
     }
 
     @And("the header of the returned block is equal to the header of the returned test node block")
     public void theHeaderOfTheReturnedBlockIsEqualToTheHeaderOfTheReturnedTestNodeBlock() throws JsonProcessingException {
         logger.info("And the header of the returned block is equal to the header of the returned test node block");
 
-        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
+        final BlockWithSignatures latestBlockSdk = ((ChainGetBlockResult) contextMap.get("blockDataSdk")).getBlockWithSignatures();
         final JsonNode latestBlockNode = mapper.readTree(contextMap.get("blockDataNode").toString());
 
-        assertThat(latestBlockSdk.getBlock().getHeader().getEraId(), is(latestBlockNode.get("header").get("era_id").asLong()));
-        assertThat(latestBlockSdk.getBlock().getHeader().getHeight(), is(latestBlockNode.get("header").get("height").asLong()));
-        assertThat(latestBlockSdk.getBlock().getHeader().getProtocolVersion(), is(latestBlockNode.get("header").get("protocol_version").asText()));
+        assertThat(latestBlockSdk.getBlock().getHeader().getEraId(), is(latestBlockNode.at("/block/Version2/header/era_id").asLong()));
+
+        assertThat(latestBlockSdk.getBlock().getHeader().getHeight(), is(latestBlockNode.at("/block/Version2/header/height").asLong()));
+        assertThat(latestBlockSdk.getBlock().getHeader().getProtocolVersion(), is(latestBlockNode.at("/block/Version2/header/protocol_version").asText()));
 
         assertThat(latestBlockSdk.getBlock().getHeader().getAccumulatedSeed(),
-                is(new Digest(latestBlockNode.get("header").get("accumulated_seed").asText())));
+                is(new Digest(latestBlockNode.at("/block/Version2/header/accumulated_seed").asText())));
         assertThat(latestBlockSdk.getBlock().getHeader().getBodyHash(),
-                is(new Digest(latestBlockNode.get("header").get("body_hash").asText())));
+                is(new Digest(latestBlockNode.at("/block/Version2/header/body_hash").asText())));
         assertThat(latestBlockSdk.getBlock().getHeader().getStateRootHash(),
-                is(new Digest(latestBlockNode.get("header").get("state_root_hash").asText())));
+                is(new Digest(latestBlockNode.at("/block/Version2/header/state_root_hash").asText())));
         assertThat(latestBlockSdk.getBlock().getHeader().getTimeStamp(),
-                is(new DateTime(latestBlockNode.get("header").get("timestamp").asText()).toDate()));
+                is(new DateTime(latestBlockNode.at("/block/Version2/header/timestamp").asText()).toDate()));
     }
 
     @And("the proofs of the returned block are equal to the proofs of the returned test node block")
@@ -241,17 +245,17 @@ public class BlockStepDefinitions {
 
         logger.info("And the proofs of the returned block are equal to the proofs of the returned test node block");
 
-        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
+        final ChainGetBlockResult latestBlockSdk = contextMap.get("blockDataSdk");
         final JsonNode latestBlockNode = mapper.readTree(contextMap.get("blockDataNode").toString());
 
-        final List<JsonProof> proofsSdk = latestBlockSdk.getProofs();
+        final List<JsonProof> proofsSdk = latestBlockSdk.getBlockWithSignatures().getProofs();
         assertThat(latestBlockNode.get("proofs").findValues("public_key").size(), is(proofsSdk.size()));
 
-        latestBlockNode.get("proofs").findValues("public_key").forEach(
+        latestBlockNode.at("/block/proofs").findValues("public_key").forEach(
                 p -> assertThat((int) proofsSdk.stream().filter(q -> p.asText().equals(q.getPublicKey().toString())).count(), is(1))
         );
 
-        latestBlockNode.get("proofs").findValues("signature").forEach(
+        latestBlockNode.at("/block/proofs/").findValues("signature").forEach(
                 p -> assertThat((int) proofsSdk.stream().filter(q -> p.asText().equals(q.getSignature().toString())).count(), is(1))
         );
     }
@@ -302,13 +306,11 @@ public class BlockStepDefinitions {
         final DeployResult deployResult = contextMap.get("deployResult");
         final List<String> transferHashes = new ArrayList<>();
 
-        mapper.readTree(contextMap.get("transferBlockNode").toString()).get("body").get("transfer_hashes").forEach(
-                t -> {
-                    if (t.textValue().equals(deployResult.getDeployHash())) {
-                        transferHashes.add(t.textValue());
-                    }
-                }
-        );
+        String transferBlockNode = mapper.readTree(contextMap.get("transferBlockNode").toString()).at("/block/Version2/body/transactions/3/0/Deploy").asText();
+
+        if (transferBlockNode.equals(deployResult.getDeployHash())) {
+            transferHashes.add(transferBlockNode);
+        }
 
         assertThat(transferHashes.size(), is(greaterThan(0)));
     }

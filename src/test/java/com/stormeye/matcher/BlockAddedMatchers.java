@@ -51,7 +51,7 @@ public class BlockAddedMatchers {
                             .map(Object::toString)
                             .collect(Collectors.joining(", "));
 
-                    block.getBody().getTransferHashes()
+                                        block.getBody().getFlatTransactions()
                             .stream()
                             .map(Object::toString)
                             .forEach(hash -> transferHashes.put(hash, event));

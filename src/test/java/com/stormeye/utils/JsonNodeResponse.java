@@ -16,7 +16,15 @@ class JsonNodeResponse implements Function<String, JsonNode> {
     @Override
     public JsonNode apply(final String response) {
         try {
-            return mapper.readTree(response);
+            int index = response.indexOf("{");
+            final String json;
+            if (index != -1) {
+                json = response.substring(index);
+            } else {
+                json = response;
+            }
+
+            return mapper.readTree(json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
