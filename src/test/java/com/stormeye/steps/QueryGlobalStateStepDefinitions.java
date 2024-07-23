@@ -5,7 +5,8 @@ import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.global.BlockHashIdentifier;
 import com.casper.sdk.identifier.global.StateRootHashIdentifier;
-import com.casper.sdk.model.block.JsonBlockData;
+import com.casper.sdk.model.block.BlockBodyV2;
+import com.casper.sdk.model.block.ChainGetBlockResult;
 import com.casper.sdk.model.common.Digest;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
@@ -13,7 +14,6 @@ import com.casper.sdk.model.deploy.DeployInfo;
 import com.casper.sdk.model.deploy.DeployResult;
 import com.casper.sdk.model.event.Event;
 import com.casper.sdk.model.event.EventTarget;
-import com.casper.sdk.model.event.EventType;
 import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.globalstate.GlobalStateData;
 import com.casper.sdk.model.key.PublicKey;
@@ -68,10 +68,7 @@ public class QueryGlobalStateStepDefinitions {
 
             // Listen for a block added event
             //noinspection unchecked
-            @SuppressWarnings("rawtypes")
-            final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
-
-                    EventType.MAIN,
+            @SuppressWarnings("rawtypes") final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) eventHandler.addEventMatcher(
                     BlockAddedMatchers.hasTransferHashWithin(() -> {
                                 final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
                                 if (deployResult != null) {
@@ -277,10 +274,10 @@ public class QueryGlobalStateStepDefinitions {
         assertThat(matchingBlockHash, is(notNullValue()));
 
         final DeployResult deployResult = contextMap.get(StepConstants.DEPLOY_RESULT);
-        final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
+        final ChainGetBlockResult block = CasperClientProvider.getInstance().getCasperService().getBlock(new HashBlockIdentifier(matchingBlockHash.toString()));
         assertThat(block, is(notNullValue()));
-        final List<String> transferHashes = block.getBlock().getBody().getTransferHashes();
-        assertThat(transferHashes, hasItem(deployResult.getDeployHash()));
+        final List<Digest> transferHashes = ((BlockBodyV2) block.getBlockWithSignatures().getBlock().getBody()).getTransferHashes();
+        assertThat(transferHashes, hasItem(new Digest(deployResult.getDeployHash())));
     }
 
     private <T> T getGlobalDataDataStoredValue() {

@@ -1,18 +1,18 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.AssetUtils;
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.dictionary.StringDictionaryIdentifier;
 import com.casper.sdk.model.account.AccountData;
-import com.casper.sdk.model.block.JsonBlockData;
+import com.casper.sdk.model.block.ChainGetBlockResult;
 import com.casper.sdk.model.dictionary.DictionaryData;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueAccount;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.AssetUtils;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -49,8 +49,8 @@ public class StateGetDictionaryItemStepDefinitions {
         privateKey.readPrivateKey(faucetPrivateKeyUrl.getFile());
         final PublicKey publicKey = PublicKey.fromAbstractPublicKey(privateKey.derivePublicKey());
 
-        final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock();
-        final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlock().getHash().toString());
+        final ChainGetBlockResult block = CasperClientProvider.getInstance().getCasperService().getBlock();
+        final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlockWithSignatures().getBlock().getHash().toString());
 
         final AccountData accountData = casperService.getStateAccountInfo(publicKey.getAlgoTaggedHex(), identifier);
         this.contextMap.put("mainPurse", accountData.getAccount().getMainPurse());

@@ -36,10 +36,11 @@ public class DeployUtils {
 
         DeployData deploy = null;
 
-        while (deploy == null || deploy.getExecutionResults().isEmpty()) {
+        while (deploy == null || deploy.getExecutionInfo().getExecutionResult() != null) {
 
             deploy = casperService.getDeploy(deployHash);
-            if (deploy.getExecutionResults().isEmpty() && System.currentTimeMillis() > now + timeout) {
+            // FIXME check this is correct
+            if (deploy.getExecutionInfo().getExecutionResult() != null && System.currentTimeMillis() > now + timeout) {
                 throw new TimeoutException("Timed-out waiting for deploy " + deployHash);
             }
 

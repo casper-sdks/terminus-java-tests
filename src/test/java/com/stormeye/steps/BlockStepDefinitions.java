@@ -5,15 +5,13 @@ import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.block.HeightBlockIdentifier;
-import com.casper.sdk.model.block.JsonBlockData;
-import com.casper.sdk.model.block.JsonProof;
+import com.casper.sdk.model.block.*;
 import com.casper.sdk.model.common.Digest;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployResult;
 import com.casper.sdk.model.event.Event;
 import com.casper.sdk.model.event.EventTarget;
-import com.casper.sdk.model.event.EventType;
 import com.casper.sdk.model.event.blockadded.BlockAdded;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.transfer.TransferData;
@@ -128,7 +126,6 @@ public class BlockStepDefinitions {
 
         //noinspection unchecked,rawtypes
         final ExpiringMatcher<Event<BlockAdded>> matcher = (ExpiringMatcher) blockEventHandler.addEventMatcher(
-                EventType.MAIN,
                 hasTransferHashWithin(
                         deployResult::getDeployHash,
                         blockAddedEvent -> contextMap.put("matchingBlock", blockAddedEvent.getData())
@@ -136,7 +133,7 @@ public class BlockStepDefinitions {
         );
 
         assertThat(matcher.waitForMatch(300), is(true));
-        blockEventHandler.removeEventMatcher(EventType.MAIN, matcher);
+        blockEventHandler.removeEventMatcher(matcher);
 
         contextMap.put("transferBlockSdk", getCasperService().getBlockTransfers());
 
@@ -178,28 +175,31 @@ public class BlockStepDefinitions {
 
         logger.info("Then the body of the returned block is equal to the body of the returned test node block");
 
-        final JsonBlockData latestBlockSdk = contextMap.get("blockDataSdk");
+        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
         JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlock().getHash().toString());
         contextMap.put("blockDataNode", latestBlockSdk);
 
         assertThat(latestBlockSdk.getBlock().getBody(), is(notNullValue()));
         assertThat(latestBlockSdk.getBlock().getBody().getProposer().toString(), is(latestBlockNode.get("body").get("proposer").asText()));
 
-        //noinspection SizeReplaceableByIsEmpty
+        assertThat(latestBlockSdk.getBlock().getBody(), is(instanceOf(BlockBodyV2.class)));
+        BlockBodyV2 body = (BlockBodyV2) latestBlockSdk.getBlock().getBody();//noinspection SizeReplaceableByIsEmpty
+
         if (latestBlockNode.get("body").get("deploy_hashes").size() == 0) {
-            assertThat(latestBlockSdk.getBlock().getBody().getDeployHashes(), is(empty()));
+            assertThat(body.getTransactions().values(), is(empty()));
         } else {
+
             latestBlockNode.get("body").findValues("deploy_hashes").forEach(
-                    d -> assertThat(latestBlockSdk.getBlock().getBody().getDeployHashes(), hasItem(d.textValue()))
+                    d -> assertThat(body.getFlatTransactions(), hasItem(new Digest(d.textValue())))
             );
         }
         //noinspection SizeReplaceableByIsEmpty
         if (latestBlockNode.get("body").get("transfer_hashes").size() == 0) {
-            assertThat(latestBlockSdk.getBlock().getBody().getTransferHashes(), is(empty()));
+            assertThat(body.getTransferHashes(), is(empty()));
         } else {
-            latestBlockSdk.getBlock().getBody().getTransferHashes();
+
             latestBlockNode.get("body").findValues("transfer_hashes").forEach(
-                    t -> assertThat(latestBlockSdk.getBlock().getBody().getTransferHashes(), hasItem(t.get(0).asText()))
+                    t -> assertThat(body.getTransferHashes(), hasItem(new Digest(t.get(0).asText())))
             );
         }
     }
@@ -208,7 +208,7 @@ public class BlockStepDefinitions {
     public void theHashOfTheReturnedBlockIsEqualToTheHashOfTheReturnedTestNodeBlock() {
         logger.info("And the hash of the returned block is equal to the hash of the returned test node block");
 
-        final JsonBlockData latestBlockSdk = contextMap.get("blockDataSdk");
+        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
         final JsonNode latestBlockNode = node.getChainBlock(latestBlockSdk.getBlock().getHash().toString());
         contextMap.put("blockDataNode", latestBlockNode);
 
@@ -219,7 +219,7 @@ public class BlockStepDefinitions {
     public void theHeaderOfTheReturnedBlockIsEqualToTheHeaderOfTheReturnedTestNodeBlock() throws JsonProcessingException {
         logger.info("And the header of the returned block is equal to the header of the returned test node block");
 
-        final JsonBlockData latestBlockSdk = contextMap.get("blockDataSdk");
+        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
         final JsonNode latestBlockNode = mapper.readTree(contextMap.get("blockDataNode").toString());
 
         assertThat(latestBlockSdk.getBlock().getHeader().getEraId(), is(latestBlockNode.get("header").get("era_id").asLong()));
@@ -241,10 +241,10 @@ public class BlockStepDefinitions {
 
         logger.info("And the proofs of the returned block are equal to the proofs of the returned test node block");
 
-        final JsonBlockData latestBlockSdk = contextMap.get("blockDataSdk");
+        final BlockWithSignatures latestBlockSdk = contextMap.get("blockDataSdk");
         final JsonNode latestBlockNode = mapper.readTree(contextMap.get("blockDataNode").toString());
 
-        final List<JsonProof> proofsSdk = latestBlockSdk.getBlock().getProofs();
+        final List<JsonProof> proofsSdk = latestBlockSdk.getProofs();
         assertThat(latestBlockNode.get("proofs").findValues("public_key").size(), is(proofsSdk.size()));
 
         latestBlockNode.get("proofs").findValues("public_key").forEach(
@@ -318,16 +318,16 @@ public class BlockStepDefinitions {
 
         logger.info("Given that the latest block is requested via the sdk");
 
-        final JsonBlockData block = getCasperService().getBlock();
+        final ChainGetBlockResult block = getCasperService().getBlock();
         contextMap.put("blockDataSdk", block);
-        contextMap.put("blockHashSdk", block.getBlock().getHash().toString());
+        contextMap.put("blockHashSdk", block.getBlockWithSignatures().getBlock().getHash().toString());
     }
 
     @Given("that a block is returned by hash via the sdk")
     public void thatABlockIsReturnedByHashViaTheSdk() {
         logger.info("Given that a block is returned by hash via the sdk");
 
-        contextMap.put("latestBlock", getCasperService().getBlock().getBlock().getHash().toString());
+        contextMap.put("latestBlock", getCasperService().getBlock().getBlockWithSignatures().getBlock().getHash().toString());
         contextMap.put("blockDataSdk", getCasperService().getBlock(new HashBlockIdentifier(contextMap.get("latestBlock"))));
     }
 
@@ -335,9 +335,9 @@ public class BlockStepDefinitions {
     public void thatABlockIsReturnedByHeightViaTheSdk(int height) {
         logger.info("Given that a block is returned by height [{}] via the sdk", height);
 
-        final JsonBlockData block = getCasperService().getBlock(new HeightBlockIdentifier(height));
+        final ChainGetBlockResult block = getCasperService().getBlock(new HeightBlockIdentifier(height));
         contextMap.put("blockDataSdk", block);
-        contextMap.put("blockHashSdk", block.getBlock().getHash().toString());
+        contextMap.put("blockHashSdk", block.getBlockWithSignatures().getBlock().getHash().toString());
     }
 
     @Given("that an invalid block hash is requested via the sdk")

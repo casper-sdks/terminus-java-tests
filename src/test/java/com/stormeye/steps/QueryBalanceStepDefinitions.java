@@ -1,6 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.*;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.global.BlockHashIdentifier;
@@ -11,17 +10,21 @@ import com.casper.sdk.identifier.purse.PurseIdentifier;
 import com.casper.sdk.identifier.purse.PurseUref;
 import com.casper.sdk.model.account.AccountData;
 import com.casper.sdk.model.balance.QueryBalanceData;
-import com.casper.sdk.model.block.JsonBlockData;
+import com.casper.sdk.model.block.BlockWithSignatures;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployData;
 import com.casper.sdk.model.deploy.DeployResult;
-import com.casper.sdk.model.deploy.executionresult.Success;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
+import com.casper.sdk.model.transaction.execution.ExecutionResultV2;
 import com.casper.sdk.model.uref.URef;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.DeployUtils;
+import com.stormeye.utils.SimpleRcpClient;
+import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.AbstractPrivateKey;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -35,7 +38,8 @@ import java.util.Random;
 
 import static com.stormeye.utils.AssetUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
@@ -53,7 +57,7 @@ public class QueryBalanceStepDefinitions {
     private JsonNode queryBalanceJson;
     private DeployData deployData;
     private long transferAmount;
-    private JsonBlockData initialBlock;
+    private BlockWithSignatures initialBlock;
     private QueryBalanceData initialBalance;
     private String initialStateRootHash;
 
@@ -107,7 +111,7 @@ public class QueryBalanceStepDefinitions {
 
         final AccountData accountInfo = casperService.getStateAccountInfo(
                 publicKey.getAlgoTaggedHex(),
-                new HashBlockIdentifier(casperService.getBlock().getBlock().getHash().toString())
+                new HashBlockIdentifier(casperService.getBlock().getBlockWithSignatures().getBlock().getHash().toString())
         );
         final String uref = accountInfo.getAccount().getMainPurse();
         final PurseIdentifier purseIdentifier = PurseUref.builder()
@@ -122,7 +126,7 @@ public class QueryBalanceStepDefinitions {
     public void aTransferOfIsMadeToUserPurse(long amount, int userId) throws Exception {
 
         this.transferAmount = amount;
-        initialBlock = casperService.getBlock();
+        initialBlock = casperService.getBlock().getBlockWithSignatures();
         this.initialStateRootHash = casperService.getStateRootHash().getStateRootHash();
 
         final AbstractPrivateKey faucetPrivateKey = getFaucetPrivateKey();
@@ -149,10 +153,11 @@ public class QueryBalanceStepDefinitions {
         final DeployResult deployResult = casperService.putDeploy(deploy);
         deployData = DeployUtils.waitForDeploy(deployResult.getDeployHash(), 300, casperService);
 
+
         // Assert successful transfer
-        assertThat(deployData.getExecutionResults().size(), is(greaterThan(0)));
-        assertThat(deployData.getExecutionResults().get(0).getResult(), is(instanceOf(Success.class)));
-        assertThat(deployData.getExecutionResults().get(0).getBlockHash(), is(not(initialBlock.getBlock().getHash().toString())));
+        assertThat(deployData.getExecutionInfo().getExecutionResult(), is(notNullValue()));
+        assertThat(((ExecutionResultV2) deployData.getExecutionInfo().getExecutionResult()).getEffects().size(), is(greaterThan(0)));
+        assertThat(deployData.getExecutionInfo().getBlockHash(), is(not(initialBlock.getBlock().getHash().toString())));
     }
 
     @And("that a query balance is obtained by user-{int}'s main purse public and latest block identifier")
@@ -162,7 +167,8 @@ public class QueryBalanceStepDefinitions {
 
         // obtain using block updated in transfer
         queryBalanceData = casperService.queryBalance(
-                BlockHashIdentifier.builder().hash(deployData.getExecutionResults().get(0).getBlockHash()).build(),
+                BlockHashIdentifier.builder().hash(deployData.getExecutionInfo().getBlockHash().toString()).build(),
+
                 purseIdentifier
         );
 

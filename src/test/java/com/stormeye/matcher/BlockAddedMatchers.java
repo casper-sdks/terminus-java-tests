@@ -1,5 +1,6 @@
 package com.stormeye.matcher;
 
+import com.casper.sdk.model.block.BlockV2;
 import com.casper.sdk.model.event.DataType;
 import com.casper.sdk.model.event.Event;
 import com.casper.sdk.model.event.blockadded.BlockAdded;
@@ -44,12 +45,13 @@ public class BlockAddedMatchers {
                 if (event.getDataType() == DataType.BLOCK_ADDED) {
                     final BlockAdded blockAdded = event.getData();
 
-                    final String deployHashes = blockAdded.getBlock().getBody().getDeployHashes()
+                   final BlockV2 block = blockAdded.getBlock();
+                    final String deployHashes = block.getBody().getTransactions().values()
                             .stream()
                             .map(Object::toString)
                             .collect(Collectors.joining(", "));
 
-                    blockAdded.getBlock().getBody().getTransferHashes()
+                    block.getBody().getTransferHashes()
                             .stream()
                             .map(Object::toString)
                             .forEach(hash -> transferHashes.put(hash, event));

@@ -2,8 +2,7 @@ package com.stormeye.event;
 
 import com.casper.sdk.model.event.Event;
 import com.casper.sdk.model.event.EventTarget;
-import com.casper.sdk.model.event.EventType;
-import com.stormeye.matcher.MatcherMap;
+import com.stormeye.matcher.Matchers;
 import com.stormeye.utils.CasperClientProvider;
 import org.hamcrest.Matcher;
 import org.slf4j.Logger;
@@ -20,13 +19,11 @@ import java.util.List;
 public class EventHandler {
 
     private final Logger logger = LoggerFactory.getLogger(EventHandler.class);
-    private final MatcherMap matcherMap = new MatcherMap();
+    private final Matchers matcherMap = new Matchers();
     private final List<AutoCloseable> sseSources = new ArrayList<>();
 
     public EventHandler(final EventTarget eventTarget) {
-        consume(EventType.DEPLOYS, eventTarget);
-        consume(EventType.MAIN, eventTarget);
-        consume(EventType.SIGS, eventTarget);
+        consume(eventTarget);
     }
 
     public void close() {
@@ -40,12 +37,11 @@ public class EventHandler {
         }
     }
 
-    private void consume(final EventType eventType, final EventTarget eventTarget) {
+    private void consume(final EventTarget eventTarget) {
 
-        logger.info("Got {} event {}", eventType, eventTarget);
+        logger.info("Got event {}", eventTarget);
         sseSources.add(
                 CasperClientProvider.getInstance().getEventService().consumeEvents(
-                        eventType,
                         eventTarget, null,
                         this::handleMatchers,
                         throwable -> logger.error("Error processing SSE event", throwable)
@@ -53,8 +49,8 @@ public class EventHandler {
         );
     }
 
-    public <T> Matcher<T> addEventMatcher(final EventType eventType, final Matcher<T> matcher) {
-        matcherMap.addEventMatcher(eventType, matcher);
+    public <T> Matcher<T> addEventMatcher(final Matcher<T> matcher) {
+        matcherMap.addEventMatcher(matcher);
         return matcher;
     }
 
@@ -62,7 +58,7 @@ public class EventHandler {
         matcherMap.handleEvent(event);
     }
 
-    public <T> void removeEventMatcher(final EventType eventType, final Matcher<T> matcher) {
-        matcherMap.removeEventMatcher(eventType, matcher);
+    public <T> void removeEventMatcher(final Matcher<T> matcher) {
+        matcherMap.removeEventMatcher(matcher);
     }
 }

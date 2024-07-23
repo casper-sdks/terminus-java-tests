@@ -1,21 +1,18 @@
 package com.stormeye.steps;
 
-import com.stormeye.matcher.NodeMatchers;
-import com.stormeye.utils.*;
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.account.AccountData;
 import com.casper.sdk.model.account.ActionThresholds;
-import com.casper.sdk.model.block.JsonBlockData;
+import com.casper.sdk.model.block.ChainGetBlockResult;
 import com.casper.sdk.model.key.PublicKey;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.stormeye.utils.*;
 import com.syntifi.crypto.key.AbstractPublicKey;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.Is;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +40,8 @@ public class StateGetAccountInfoStepDefinitions {
         logger.info("Given that the state_get_account_info RCP method is invoked against the node");
 
         final String hexPublicKey = getUserOneHexPublicKey();
-        final JsonBlockData block = CasperClientProvider.getInstance().getCasperService().getBlock();
-        final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlock().getHash().toString());
+        final ChainGetBlockResult block = CasperClientProvider.getInstance().getCasperService().getBlock();
+        final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlockWithSignatures().getBlock().getHash().toString());
 
         final AccountData stateAccountInfo = CasperClientProvider.getInstance().getCasperService().getStateAccountInfo(hexPublicKey, identifier);
         contextMap.put(StepConstants.STATE_ACCOUNT_INFO, stateAccountInfo);

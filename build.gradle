@@ -14,10 +14,12 @@ repositories {
     mavenCentral()
 }
 
+def homePath = System.properties['user.home'];
+
 dependencies {
 
-    //implementation fileTree(dir: '~/casper/casper-java-sdk/build/libs', include: '*.jar')
-    implementation "network.casper:casper-java-sdk:${casperSdkVersion}"
+    implementation fileTree(dir: "/${homePath}/casper/casper-java-sdk/build/libs", include: '*.jar')
+    //  implementation "network.casper:casper-java-sdk:${casperSdkVersion}"
     implementation "dev.oak3:sbs4j:${sbs4jVersion}"
     implementation "io.github.oak:jsonrpc4j:${jsonrpc4jVersion}"
     implementation "com.syntifi.crypto:crypto-key-common:${cryptokeyVersion}"

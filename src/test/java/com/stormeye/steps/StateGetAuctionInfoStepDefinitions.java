@@ -1,20 +1,20 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.CasperClientProvider;
-import com.stormeye.utils.ContextMap;
-import com.stormeye.utils.SimpleRcpClient;
-import com.stormeye.utils.TestProperties;
 import com.casper.sdk.exception.CasperClientException;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.block.HeightBlockIdentifier;
 import com.casper.sdk.model.auction.AuctionData;
 import com.casper.sdk.model.bid.JsonBids;
-import com.casper.sdk.model.block.JsonBlockData;
+import com.casper.sdk.model.block.ChainGetBlockResult;
 import com.casper.sdk.model.era.JsonEraValidators;
 import com.casper.sdk.model.era.JsonValidatorWeight;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.stormeye.utils.CasperClientProvider;
+import com.stormeye.utils.ContextMap;
+import com.stormeye.utils.SimpleRcpClient;
+import com.stormeye.utils.TestProperties;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -45,8 +45,8 @@ public class StateGetAuctionInfoStepDefinitions {
     @Given("that the state_get_auction_info RPC method is invoked by hash block identifier")
     public void thatTheState_get_auction_infoRPCMethodIsInvoked() throws Exception {
         logger.info("Given that the state_get_auction_info RPC method is invoked by hash block identifier");
-        final JsonBlockData block = casperService.getBlock();
-        final String parentHash = block.getBlock().getHeader().getParentHash().toString();
+        final ChainGetBlockResult block = casperService.getBlock();
+        final String parentHash = block.getBlockWithSignatures().getBlock().getHeader().getParentHash().toString();
         contextMap.put("parentHash", parentHash);
 
         final JsonNode auctionInfoByHash = simpleRcpClient.getAuctionInfoByHash(parentHash).at("/result");
@@ -64,15 +64,15 @@ public class StateGetAuctionInfoStepDefinitions {
     public void thatTheState_get_auction_infoRPCMethodIsInvokedByHeightBlockIdentifier() throws Exception {
         logger.info("Given that the state_get_auction_info RPC method is invoked by height block identifier");
 
-        final JsonBlockData currentBlock = casperService.getBlock();
-        final String parentHash = currentBlock.getBlock().getHeader().getParentHash().toString();
-        final JsonBlockData block = casperService.getBlock(new HashBlockIdentifier(parentHash));
+        final ChainGetBlockResult currentBlock = casperService.getBlock();
+        final String parentHash = currentBlock.getBlockWithSignatures().getBlock().getHeader().getParentHash().toString();
+        final ChainGetBlockResult block = casperService.getBlock(new HashBlockIdentifier(parentHash));
 
         final JsonNode stateAuctionInfoJson = simpleRcpClient.getAuctionInfoByHash(parentHash).at("/result");
         assertThat(stateAuctionInfoJson, is(notNullValue()));
         contextMap.put(STATE_AUCTION_INFO_JSON, stateAuctionInfoJson);
 
-        final AuctionData auctionData = casperService.getStateAuctionInfo(new HeightBlockIdentifier(block.getBlock().getHeader().getHeight()));
+        final AuctionData auctionData = casperService.getStateAuctionInfo(new HeightBlockIdentifier(block.getBlockWithSignatures().getBlock().getHeader().getHeight()));
         contextMap.put(STATE_GET_AUCTION_INFO_RESULT, auctionData);
     }
 
