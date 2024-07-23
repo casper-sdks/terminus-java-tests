@@ -27,7 +27,7 @@ function _docker() {
   docker stop $DOCKER_NAME > /dev/null 2>&1 && docker rm -fv $DOCKER_NAME > /dev/null 2>&1
 
   printf "[  Starting image  ]\r\n"
-  docker run --rm -it --name $DOCKER_NAME -d -p 25101:25101 -p 11101:11101 -p 14101:14101 -p 18101:18101 "$NODE" > /dev/null 2>&1
+  docker run --rm -it --name $DOCKER_NAME -d -p 11101:11101 -p 13101:13101 -p 14101:14101 -p 18101:18101 -p 21101:21101 -p 22101:22101  "$NODE" > /dev/null 2>&1
 
   res=$( docker exec -t $DOCKER_NAME  /bin/bash -c -i 'cctl-infra-net-status'  |  awk '{print $1}')
   PROGRESS="...."
