@@ -1,13 +1,12 @@
 package com.stormeye.utils;
 
-import com.stormeye.exception.NodeCommandException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stormeye.exception.NodeCommandException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -54,7 +53,12 @@ public class Node {
     public String getStateRootHash(final int nodeId) {
         return execute("cctl-chain-view-state-root-hash", "node=" + nodeId, s -> {
                     var nodes = s.split("\n");
-                    return nodes[nodeId - 1].split("=")[1].trim();
+                    for (String node : nodes) {
+                        if (node.contains("state root @")) {
+                            return node.split("=")[1].trim();
+                        }
+                    }
+                    return null;
                 }
         );
     }
