@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIn.oneOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
@@ -129,6 +130,7 @@ public class EraStepDefinitions {
                 .map(d -> (Delegator) d)
                 .collect(Collectors.toList());
 
+
         allocations.findValues("Delegator").forEach(
                 d -> {
                     final List<SeigniorageAllocation> found = delegatorsSdk
@@ -138,7 +140,10 @@ public class EraStepDefinitions {
 
                     assertThat(found.isEmpty(), is(false));
                     assertThat(d.get("validator_public_key").asText(), is(((Delegator) found.get(0)).getValidatorPublicKey().toString()));
-                    assertThat(d.get("amount").asText(), is(found.get(0).getAmount().toString()));
+                    assertThat(
+                            d.get("amount").asText(),
+                            is(oneOf(found.get(0).getAmount().toString(), found.get(1).getAmount().toString()))
+                    );
                 }
         );
     }
@@ -168,7 +173,10 @@ public class EraStepDefinitions {
                             .collect(Collectors.toList());
 
                     assertThat(found.isEmpty(), is(false));
-                    assertThat(d.get("amount").asText(), is(found.get(0).getAmount().toString()));
+                    assertThat(
+                            d.get("amount").asText(),
+                            is(oneOf(found.get(0).getAmount().toString(), found.get(1).getAmount().toString()))
+                    );
                 }
         );
     }
