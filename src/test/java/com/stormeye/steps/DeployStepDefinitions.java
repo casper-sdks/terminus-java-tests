@@ -182,7 +182,7 @@ public class DeployStepDefinitions {
         assertThat(block, is(notNullValue()));
         assertThat(block.getBlockWithSignatures().getBlock(), is(instanceOf(BlockV2.class)));
         BlockBodyV2 body = ((BlockV2) block.getBlockWithSignatures().getBlock()).getBody();
-        final List<Digest> transferHashes = body.getTransferHashes();
+        final List<Digest> transferHashes = body.getFlatTransactions();
         assertThat(transferHashes, hasItem(new Digest(deployResult.getDeployHash())));
     }
 
