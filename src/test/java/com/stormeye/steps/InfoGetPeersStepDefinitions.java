@@ -59,7 +59,7 @@ public class InfoGetPeersStepDefinitions {
         final Optional<PeerEntry> match = getPeerData().getPeers().stream()
                 .filter(peerEntry -> isValidPeer(port, peerEntry))
                 .findFirst();
-        assertThat(match.isPresent(), is(true));
+        assertThat("Missing port " + port, match.isPresent(), is(true));
     }
 
     private static boolean isValidPeer(final int port, final PeerEntry peerEntry) {
