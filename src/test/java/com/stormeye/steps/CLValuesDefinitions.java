@@ -1,6 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.*;
 import com.casper.sdk.exception.NoSuchTypeException;
 import com.casper.sdk.helper.CasperDeployHelper;
 import com.casper.sdk.model.clvalue.*;
@@ -17,7 +16,9 @@ import com.casper.sdk.model.deploy.NamedArg;
 import com.casper.sdk.model.deploy.executabledeploy.ModuleBytes;
 import com.casper.sdk.model.deploy.executabledeploy.Transfer;
 import com.casper.sdk.model.key.PublicKey;
+import com.casper.sdk.model.transaction.execution.ExecutionResultV2;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.*;
 import com.syntifi.crypto.key.Ed25519PrivateKey;
 import com.syntifi.crypto.key.Ed25519PublicKey;
 import io.cucumber.java.en.And;
@@ -110,7 +111,7 @@ public class CLValuesDefinitions {
     }
 
     @Then("the deploy body hash is {string}")
-    public void theDeployBodyHashIs(final String bodyHash)  {
+    public void theDeployBodyHashIs(final String bodyHash) {
 
         final Deploy deploy = this.contextMap.get(StepConstants.PUT_DEPLOY);
         final Digest digest = deploy.getHeader().getBodyHash();
@@ -132,8 +133,11 @@ public class CLValuesDefinitions {
 
         final DeployResult deployResult = this.contextMap.get(StepConstants.DEPLOY_RESULT);
         final DeployData deployData = DeployUtils.waitForDeploy(deployResult.getDeployHash(), 300, this.casperService);
-        // FIXME
-        // assertThat(deployData.getExecutionResults().get(0).getResult(), is(instanceOf(Success.class)));
+        assertThat(deployData.getExecutionInfo(), is(notNullValue()));
+        assertThat(deployData.getExecutionInfo().getExecutionResult(), is(notNullValue(ExecutionResultV2.class)));
+        ExecutionResultV2 resultV2 = deployData.getExecutionInfo().getExecutionResult();
+       // FIXME error message for all historic deploys
+        // assertThat("No error message", resultV2.getErrorMessage(), is(nullValue()));
     }
 
     @When("the deploy is obtained from the node")
