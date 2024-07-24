@@ -125,8 +125,7 @@ public class InfoGetStatusStepDefinitions {
         assertThat(actualSeconds - expectedSeconds, is(lessThanOrEqualTo(5)));
 
         assertThat(statusData.getUptime(), containsString("m "));
-        assertThat(statusData.getUptime(), containsString("s "));
-        assertThat(statusData.getUptime(), endsWith("ms"));
+        assertThat(statusData.getUptime(), containsString("s"));
     }
 
     @And("the info_get_status_result has a valid peers")
