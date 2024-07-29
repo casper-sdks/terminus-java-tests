@@ -131,18 +131,18 @@ public class StateGetAuctionInfoStepDefinitions {
         final BigInteger stakedAmount = new BigInteger(bidsJson.at("/0/bid/staked_amount").asText());
         assertThat(firstBid.getBid().getStakedAmount(), is(stakedAmount));
 
-        final String delegatorBondingPurse = bidsJson.at("/0/bid/delegators/0/bonding_purse").asText();
-        assertThat(firstBid.getBid().getDelegators().get(0).getBondingPurse().getJsonURef(), is(delegatorBondingPurse));
+        final String delegatorBondingPurse = bidsJson.at("/0/bid/delegators/0/delegator/bonding_purse").asText();
+        assertThat(firstBid.getBid().getDelegators().get(0).getDelegator().getBondingPurse().getJsonURef(), is(delegatorBondingPurse));
 
-        final String delegatee = bidsJson.at("/0/bid/delegators/0/delegatee").asText();
-        assertThat(firstBid.getBid().getDelegators().get(0).getDelegatee().getAlgoTaggedHex(), is(delegatee));
+        final String delegatee = bidsJson.at("/0/bid/delegators/0/delegator/delegator_public_key").asText();
+        assertThat(firstBid.getBid().getDelegators().get(0).getDelegator().getDelegatorPublicKey().getAlgoTaggedHex(), is(delegatee));
 
-        final String delegateePublicKey = bidsJson.at("/0/bid/delegators/0/public_key").asText();
-        final PublicKey pubKey = firstBid.getBid().getDelegators().get(0).getPublicKey();
+        final String delegateePublicKey = bidsJson.at("/0/bid/delegators/0/delegator/validator_public_key").asText();
+        final PublicKey pubKey = firstBid.getBid().getDelegators().get(0).getDelegator().getValidatorPublicKey();
         assertThat(pubKey.getAlgoTaggedHex(), is(delegateePublicKey));
 
-        final BigInteger delegateeStakedAmount = new BigInteger(bidsJson.at("/0/bid/delegators/0/staked_amount").asText());
-        assertThat(firstBid.getBid().getDelegators().get(0).getStakedAmount(), is(delegateeStakedAmount));
+        final BigInteger delegateeStakedAmount = new BigInteger(bidsJson.at("/0/bid/delegators/0/delegator/staked_amount").asText());
+        assertThat(firstBid.getBid().getDelegators().get(0).getDelegator().getStakedAmount(), is(delegateeStakedAmount));
     }
 
 

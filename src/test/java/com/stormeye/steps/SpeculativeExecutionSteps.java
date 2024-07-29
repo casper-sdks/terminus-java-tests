@@ -1,6 +1,5 @@
 package com.stormeye.steps;
 
-import com.stormeye.utils.CasperClientProvider;
 import com.casper.sdk.helper.CasperTransferHelper;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.model.account.AccountData;
@@ -12,6 +11,7 @@ import com.casper.sdk.model.deploy.executionresult.Success;
 import com.casper.sdk.model.deploy.transform.*;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.service.CasperService;
+import com.stormeye.utils.CasperClientProvider;
 import com.stormeye.utils.TestProperties;
 import com.syntifi.crypto.key.AbstractPrivateKey;
 import io.cucumber.java.en.And;
@@ -24,9 +24,9 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.stormeye.utils.AssetUtils.getFaucetPrivateKey;
 import static com.stormeye.utils.AssetUtils.getUserPrivateKey;
-import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,6 +46,7 @@ public class SpeculativeExecutionSteps {
     private Entry transform;
     private Deploy deploy;
     private final TestProperties testProperties = new TestProperties();
+
     @Given("that the {string} account transfers {long} to user-{int} account with a gas payment amount of {long} using the speculative_exec RPC API")
     public void thatTheFaucetAccountTransfersToUserAccountUsingTheSpeculative_execRPCAPI(final String faucet,
                                                                                          final long transferAmount,
@@ -245,7 +246,7 @@ public class SpeculativeExecutionSteps {
     }
 
     private int getUserId(Object id) {
-        return id instanceof Number ? (Integer) id : new Integer(id.toString().split("-")[1]);
+        return id instanceof Number ? (Integer) id : Integer.valueOf(id.toString().split("-")[1]);
     }
 
     private String getAccountHash(Object accountId) throws IOException {
