@@ -8,13 +8,15 @@ import com.casper.sdk.identifier.purse.MainPurseUnderAccountHash;
 import com.casper.sdk.identifier.purse.MainPurseUnderPublickey;
 import com.casper.sdk.identifier.purse.PurseIdentifier;
 import com.casper.sdk.identifier.purse.PurseUref;
-import com.casper.sdk.model.account.AccountData;
+import com.casper.sdk.model.account.PublicKeyIdentifier;
 import com.casper.sdk.model.balance.QueryBalanceData;
 import com.casper.sdk.model.block.BlockWithSignatures;
 import com.casper.sdk.model.common.Ttl;
 import com.casper.sdk.model.deploy.Deploy;
 import com.casper.sdk.model.deploy.DeployData;
 import com.casper.sdk.model.deploy.DeployResult;
+import com.casper.sdk.model.entity.AddressableEntity;
+import com.casper.sdk.model.entity.StateEntityResult;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.transaction.execution.ExecutionResultV2;
@@ -108,18 +110,16 @@ public class QueryBalanceStepDefinitions {
     public void thatAQueryBalanceIsObtainedByMainPurseUref() throws Exception {
 
         final PublicKey publicKey = getFaucetPublicKey();
+        final HashBlockIdentifier identifier = new HashBlockIdentifier(casperService.getBlock().getBlockWithSignatures().getBlock().getHash().toString());
+        final StateEntityResult stateEntity = casperService.getStateEntity(new PublicKeyIdentifier(publicKey), identifier);
+        final URef mainPurse = ((AddressableEntity) stateEntity.getEntity()).getEntity().getMainPurse();
 
-        final AccountData accountInfo = casperService.getStateAccountInfo(
-                publicKey.getAlgoTaggedHex(),
-                new HashBlockIdentifier(casperService.getBlock().getBlockWithSignatures().getBlock().getHash().toString())
-        );
-        final String uref = accountInfo.getAccount().getMainPurse();
         final PurseIdentifier purseIdentifier = PurseUref.builder()
-                .purseURef(URef.fromString(uref))
+                .purseURef(mainPurse)
                 .build();
 
         queryBalanceData = casperService.queryBalance(null, purseIdentifier);
-        queryBalanceJson = simpleRcpClient.queryBalance("purse_uref", uref);
+        queryBalanceJson = simpleRcpClient.queryBalance("purse_uref", mainPurse.getJsonURef());
     }
 
     @When("a transfer of {long} is made to user-{int}'s purse")
