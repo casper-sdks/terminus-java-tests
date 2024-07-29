@@ -3,12 +3,15 @@ package com.stormeye.steps;
 import com.casper.sdk.identifier.block.BlockIdentifier;
 import com.casper.sdk.identifier.block.HashBlockIdentifier;
 import com.casper.sdk.identifier.dictionary.StringDictionaryIdentifier;
-import com.casper.sdk.model.account.AccountData;
+import com.casper.sdk.model.account.PublicKeyIdentifier;
 import com.casper.sdk.model.block.ChainGetBlockResult;
 import com.casper.sdk.model.dictionary.DictionaryData;
+import com.casper.sdk.model.entity.AddressableEntity;
+import com.casper.sdk.model.entity.StateEntityResult;
 import com.casper.sdk.model.key.PublicKey;
 import com.casper.sdk.model.stateroothash.StateRootHashData;
 import com.casper.sdk.model.storedvalue.StoredValueAccount;
+import com.casper.sdk.model.uref.URef;
 import com.casper.sdk.service.CasperService;
 import com.stormeye.utils.AssetUtils;
 import com.stormeye.utils.CasperClientProvider;
@@ -52,9 +55,9 @@ public class StateGetDictionaryItemStepDefinitions {
         final ChainGetBlockResult block = CasperClientProvider.getInstance().getCasperService().getBlock();
         final BlockIdentifier identifier = new HashBlockIdentifier(block.getBlockWithSignatures().getBlock().getHash().toString());
 
-        final AccountData accountData = casperService.getStateAccountInfo(publicKey.getAlgoTaggedHex(), identifier);
-        this.contextMap.put("mainPurse", accountData.getAccount().getMainPurse());
-
+        final StateEntityResult stateEntity = casperService.getStateEntity(new PublicKeyIdentifier(publicKey), identifier);
+        final URef mainPurse = ((AddressableEntity) stateEntity.getEntity()).getEntity().getMainPurse();
+        this.contextMap.put("mainPurse", mainPurse);
         final String accountHash = publicKey.generateAccountHash(true);
         final StringDictionaryIdentifier key = StringDictionaryIdentifier.builder().dictionary(accountHash).build();
         this.contextMap.put("accountHash", accountHash);
@@ -79,7 +82,7 @@ public class StateGetDictionaryItemStepDefinitions {
 
         final StoredValueAccount storedValueAccount = (StoredValueAccount) dictionaryData.getStoredValue();
         assertThat(storedValueAccount.getValue().getHash(), is(accountHash));
-        final String mainPurse = this.contextMap.get("mainPurse");
-        assertThat(storedValueAccount.getValue().getMainPurse(), is(mainPurse));
+        final URef mainPurse = this.contextMap.get("mainPurse");
+        assertThat(storedValueAccount.getValue().getMainPurse(), is(mainPurse.getJsonURef()));
     }
 }
