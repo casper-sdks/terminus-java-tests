@@ -44,7 +44,7 @@ public class Node {
             }
         });
 
-        final String mainPurse = JsonUtils.getJsonValue(node, "/main_purse");
+        final String mainPurse = JsonUtils.getJsonValue(node, "/result/entity/AddressableEntity/entity/main_purse");
         assertThat(mainPurse, is(notNullValue()));
         assertThat(mainPurse, startsWith("uref-"));
         return mainPurse;
